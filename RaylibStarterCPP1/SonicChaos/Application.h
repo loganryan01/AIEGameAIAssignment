@@ -28,5 +28,10 @@ private:
 	Texture2D m_map;
 
 	Camera2D m_camera;
+
+	std::vector<Rectangle> m_topWalls;
+	std::vector<Rectangle> m_leftWalls;
+	std::vector<Rectangle> m_rightWalls;
+	std::vector<Rectangle> m_bottomWalls;
 };
 
