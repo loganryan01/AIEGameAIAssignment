@@ -2,11 +2,11 @@
 
 PlayerAgent::PlayerAgent()
 {
-	m_texture = LoadTexture("C:/Users/logan/Desktop/AIEGameAIAssignment/Resources/myTilemap/Sonic.png");
+	m_texture = LoadTexture("C:/Users/logan/Desktop/AIEGameAIAssignment/Resources/myTilemap/Shadow.png");
 
 	m_topAABB = { m_position.x, m_position.y, (float)m_texture.width, 1.0f };
 	m_leftAABB = { m_position.x, m_position.y, 1.0f, (float)m_texture.height };
-	m_rightAABB = { m_position.x + 15.0f, m_position.y, 1.0f, (float)m_texture.height };
+	m_rightAABB = { m_position.x + (float)m_texture.width, m_position.y, 1.0f, (float)m_texture.height };
 	m_bottomAABB = { m_position.x, m_position.y + ((float)m_texture.height - 1.0f), (float)m_texture.width, 1.0f};
 }
 
@@ -19,7 +19,7 @@ void PlayerAgent::Update(float deltaTime)
 {
 	m_topAABB = { m_position.x, m_position.y, (float)m_texture.width, 1.0f };
 	m_leftAABB = { m_position.x, m_position.y, 1.0f, (float)m_texture.height };
-	m_rightAABB = { m_position.x + 15.0f, m_position.y, 1.0f, (float)m_texture.height };
+	m_rightAABB = { m_position.x + (float)m_texture.width, m_position.y, 1.0f, (float)m_texture.height };
 	m_bottomAABB = { m_position.x, m_position.y + ((float)m_texture.height - 1.0f), (float)m_texture.width, 1.0f };
 	
 	Agent::Update(deltaTime);

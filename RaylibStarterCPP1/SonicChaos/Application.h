@@ -21,6 +21,14 @@ private:
 	int m_windowWidth;
 	int m_windowHeight;
 
+	void LoadLeftWall();
+	void LoadRightWall();
+
+	void CreateTopWall(float x, float y, float width, float height);
+	void CreateLeftWall(float x, float y, float width, float height);
+	void CreateRightWall(float x, float y, float width, float height);
+	void CreateBottomWall(float x, float y, float width, float height);
+
 	PlayerAgent* m_player = nullptr;
 	
 	KeyboardBehaviour* m_keyboardBehaviour = nullptr;
