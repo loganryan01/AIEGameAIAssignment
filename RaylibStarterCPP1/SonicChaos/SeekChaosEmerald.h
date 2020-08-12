@@ -12,9 +12,11 @@ public:
 	void SetTarget(Vector2 position) { m_target = position; }
 	Vector2 GetTarget() { return m_target; }
 
+
+
 private:
 	Vector2 Normalise(Vector2 vector2);
-	void OnArrival();
+	bool OnArrival();
 
 	float m_maxVelocity = 100.0f;
 	Vector2 m_target = { 0, 0 };

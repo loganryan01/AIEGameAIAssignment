@@ -13,9 +13,11 @@ public:
 	virtual ~Graph2D();
 
 	void Draw();
+	void DrawPath(std::list<Node*>& path);
 
 	void SetDoorNode(float xPos, float yPos);
 
 	void GetNearbyNodes(Vector2 position, float radius, std::vector<Graph2D::Node*>& out_nodes);
+	void SetEdges(Graph2D::Node* start, float radius);
 };
 

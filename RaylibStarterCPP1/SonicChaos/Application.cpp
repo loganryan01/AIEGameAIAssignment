@@ -46,7 +46,7 @@ void Application::Load()
 	m_keyboardBehaviour = new KeyboardBehaviour();
 	m_seekChaosEmerald = new SeekChaosEmerald();
 	m_seekMasterEmerald = new SeekMasterEmerald();
-	m_seekChaosEmerald->SetTarget(m_graph->GetNodes()[0]->data);
+	
 	m_seekMasterEmerald->SetTarget({ 240,40 });
 	m_player->AddBehaviour(m_seekChaosEmerald);
 
@@ -55,34 +55,8 @@ void Application::Load()
 	m_camera.offset = {(float)m_windowWidth / 2, (float)m_windowHeight / 2};
 	m_camera.zoom = 8.0f;
 
-	// Walls
-	/*CreateTopWall(0, 0, 96, 16);
-	CreateTopWall(0, 128, 32, 16);
-	CreateTopWall(64, 128, 59, 16);
-	CreateTopWall(165, 128, 27, 16);
-	CreateTopWall(101, 32, 86, 16);
-	CreateTopWall(5, 240, 22, 16);
-	CreateTopWall(69, 240, 118, 16);
-	CreateTopWall(101, 336, 22, 16);
-	CreateTopWall(165, 336, 22, 16);
-	CreateTopWall(197, 0, 86, 16);
-	CreateTopWall(293, 0, 86, 16);*/
-
-	//LoadLeftWall();
-	//LoadRightWall();
-
-	/*CreateBottomWall(0, 64, 27, 16);
-	CreateBottomWall(69, 64, 27, 16);
-	CreateBottomWall(0, 192, 27, 16);
-	CreateBottomWall(69, 192, 123, 16);
-	CreateBottomWall(101, 112, 22, 16);
-	CreateBottomWall(165, 112, 22, 16);
-	CreateBottomWall(5, 320, 118, 16);
-	CreateBottomWall(165, 320, 22, 16);
-	CreateBottomWall(101, 400, 86, 16);
-	CreateBottomWall(197, 192, 22, 16);
-	CreateBottomWall(261, 192, 22, 16);
-	CreateBottomWall(293, 192, 86, 16);*/
+	m_myPath = m_graph->dijkstrasSearch(m_graph->GetNodes().front(), m_graph->GetNodes().back());
+	m_seekChaosEmerald->SetTarget(m_graph->GetNodes()[0]->data);
 }
 
 void Application::Unload()
@@ -168,6 +142,7 @@ void Application::Draw()
 	//DrawCircleLines(m_seekChaosEmerald->GetTarget().x, m_seekChaosEmerald->GetTarget().y, 25.0f, BLACK);
 
 	m_graph->Draw();
+	m_graph->DrawPath(m_myPath);
 
 	//EndMode2D();
 
@@ -339,6 +314,7 @@ Graph2D* Application::LoadGraph()
 	Image image = LoadImage("./resources/graph.png");
 	Color* pixels = GetImageData(image);
 	Graph2D* graph = new Graph2D;
+	std::vector<Graph2D::Node*> nodes;
 
 	int tileWidth = 16;
 	int tileHeight = 16;
@@ -355,12 +331,19 @@ Graph2D* Application::LoadGraph()
 			if (c.a > 0 && c.b < 210)
 			{
 				graph->SetDoorNode(xPos, yPos);
+				
 			}
 			else if (c.a > 0)
 			{
 				graph->AddNode({ xPos, yPos });
+				
 			}
 		}
+	}
+
+	for (auto node : graph->GetNodes())
+	{
+		graph->SetEdges(node, 32.0f);
 	}
 
   	return graph;

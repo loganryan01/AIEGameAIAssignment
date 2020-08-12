@@ -17,9 +17,14 @@ Vector2 SeekChaosEmerald::Normalise(Vector2 vector2)
 	return normalisedVector;
 }
 
-void SeekChaosEmerald::OnArrival()
+bool SeekChaosEmerald::OnArrival()
 {
+	// TODO: complete this function
+	// Get the player position
+	// Check how far away the player is from the node
+	// if the player is on the node then move to the next node
 	SetTarget({ 800, 800 });
+	return true;
 }
 
 Vector2 SeekChaosEmerald::Update(Agent* agent, float deltaTime)

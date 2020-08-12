@@ -51,5 +51,7 @@ private:
 	std::vector<Rectangle> m_leftWalls;
 	std::vector<Rectangle> m_rightWalls;
 	std::vector<Rectangle> m_bottomWalls;
+
+	std::list<Graph2D::Node*> m_myPath;
 };
 

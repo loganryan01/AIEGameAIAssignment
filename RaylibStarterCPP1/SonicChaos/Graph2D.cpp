@@ -26,6 +26,26 @@ void Graph2D::Draw()
 			DrawCircleLines(node->data.x, node->data.y, 8, LIGHTGRAY);
 		}
 	}
+
+	// Draw all connections
+	/*for (auto node : GetNodes())
+	{
+		for (auto connection : node->connections)
+		{
+			DrawLine(node->data.x, node->data.y, connection.to->data.x, connection.to->data.y, RED);
+		}
+	}*/
+}
+
+void Graph2D::DrawPath(std::list<Node*>& path)
+{
+	for (auto node : path)
+	{
+		for (auto connection : node->connections)
+		{
+			DrawLine(node->data.x, node->data.y, connection.to->data.x, connection.to->data.y, RED);
+		}
+	}
 }
 
 void Graph2D::SetDoorNode(float xPos, float yPos)
@@ -45,6 +65,23 @@ void Graph2D::GetNearbyNodes(Vector2 position, float radius, std::vector<Graph2D
 		if (dist < radius)
 		{
 			out_nodes.push_back(node);
+		}
+	}
+}
+
+void Graph2D::SetEdges(Graph2D::Node* start, float radius)
+{
+	float numberOfNodes = 1.0f;
+	for (auto node : m_nodes)
+	{
+		numberOfNodes += 1.0f;
+		if (node != start)
+		{
+			float dist = Vector2Distance(start->data, node->data);
+			if (dist < radius)
+			{
+				AddEdge(start, node, numberOfNodes);
+			}
 		}
 	}
 }
