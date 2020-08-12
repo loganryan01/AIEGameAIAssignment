@@ -6,6 +6,7 @@ Application::Application(int windowWidth, int windowHeight) :
 	m_windowWidth(windowWidth), m_windowHeight(windowHeight)
 {
 	m_map = { 0, 0, 0, 0, 0 };
+	m_image = { 0, 0, 0, 0, 0 };
 	m_camera = { {0,0}, {0,0}, 0, 0 };
 }
 
@@ -33,15 +34,21 @@ void Application::Load()
 	InitWindow(m_windowWidth, m_windowHeight, "Sonic Chaos");
 
 	// Textures
-	m_map = LoadTexture("C:/Users/logan/Desktop/AIEGameAIAssignment/Resources/myTilemap/tilemap.png");
-
+	m_image = LoadImage("./resources/tilemap.png");
+	m_map = LoadTextureFromImage(m_image);
+	m_graph = LoadGraph();
+	
 	// Agents
 	m_player = new PlayerAgent();
 	m_player->SetPosition({ 360, 330 });
 
 	// Behaviours
 	m_keyboardBehaviour = new KeyboardBehaviour();
-	m_player->AddBehaviour(m_keyboardBehaviour);
+	m_seekChaosEmerald = new SeekChaosEmerald();
+	m_seekMasterEmerald = new SeekMasterEmerald();
+	m_seekChaosEmerald->SetTarget(m_graph->GetNodes()[0]->data);
+	m_seekMasterEmerald->SetTarget({ 240,40 });
+	m_player->AddBehaviour(m_seekChaosEmerald);
 
 	// Camera
 	m_camera.target = { m_player->GetPosition().x + m_player->GetWidth() / 2, m_player->GetPosition().y + m_player->GetHeight() / 2 };
@@ -62,7 +69,7 @@ void Application::Load()
 	CreateTopWall(293, 0, 86, 16);*/
 
 	//LoadLeftWall();
-	LoadRightWall();
+	//LoadRightWall();
 
 	/*CreateBottomWall(0, 64, 27, 16);
 	CreateBottomWall(69, 64, 27, 16);
@@ -89,42 +96,42 @@ void Application::Unload()
 
 void Application::Update(float deltaTime)
 {
-	for (int i = 0; i < m_topWalls.size(); i++)
-	{
-		// Stop player from going up
-		if (CheckCollisionRecs(m_player->GetTopAABB(), m_topWalls[i]) && m_player->GetVelocity().y < 0)
-		{
-			m_player->SetVelocity({ m_player->GetVelocity().x, 0 });
-		}
-	}
+	//for (int i = 0; i < m_topWalls.size(); i++)
+	//{
+	//	// Stop player from going up
+	//	if (CheckCollisionRecs(m_player->GetTopAABB(), m_topWalls[i]) && m_player->GetVelocity().y < 0)
+	//	{
+	//		m_player->SetVelocity({ m_player->GetVelocity().x, 0 });
+	//	}
+	//}
 
-	for (int i = 0; i < m_leftWalls.size(); i++)
-	{
-		if (CheckCollisionRecs(m_player->GetLeftAABB(), m_leftWalls[i]) && m_player->GetVelocity().x < 0)
-		{
-			m_player->SetVelocity({ 0, m_player->GetVelocity().y });
-		}
-	}
+	//for (int i = 0; i < m_leftWalls.size(); i++)
+	//{
+	//	if (CheckCollisionRecs(m_player->GetLeftAABB(), m_leftWalls[i]) && m_player->GetVelocity().x < 0)
+	//	{
+	//		m_player->SetVelocity({ 0, m_player->GetVelocity().y });
+	//	}
+	//}
 
-	for (int i = 0; i < m_rightWalls.size(); i++)
-	{
-		if (CheckCollisionRecs(m_player->GetRightAABB(), m_rightWalls[i]) && m_player->GetVelocity().x > 0)
-		{
-			m_player->SetVelocity({ 0, m_player->GetVelocity().y });
-		}
-	}
+	//for (int i = 0; i < m_rightWalls.size(); i++)
+	//{
+	//	if (CheckCollisionRecs(m_player->GetRightAABB(), m_rightWalls[i]) && m_player->GetVelocity().x > 0)
+	//	{
+	//		m_player->SetVelocity({ 0, m_player->GetVelocity().y });
+	//	}
+	//}
 
-	for (int i = 0; i < m_bottomWalls.size(); i++)
-	{
-		// Stop player from going up
-		if (CheckCollisionRecs(m_player->GetBottomAABB(), m_bottomWalls[i]) && m_player->GetVelocity().y > 0)
-		{
-			m_player->SetVelocity({ m_player->GetVelocity().x, 0 });
-		}
-	}
+	//for (int i = 0; i < m_bottomWalls.size(); i++)
+	//{
+	//	// Stop player from going up
+	//	if (CheckCollisionRecs(m_player->GetBottomAABB(), m_bottomWalls[i]) && m_player->GetVelocity().y > 0)
+	//	{
+	//		m_player->SetVelocity({ m_player->GetVelocity().x, 0 });
+	//	}
+	//}
 	
 	m_player->Update(deltaTime);
-	m_camera.target = { m_player->GetPosition().x + m_player->GetWidth() / 2, m_player->GetPosition().y + m_player->GetHeight() / 2 };
+	//m_camera.target = { m_player->GetPosition().x + m_player->GetWidth() / 2, m_player->GetPosition().y + m_player->GetHeight() / 2 };
 }
 
 void Application::Draw()
@@ -138,7 +145,7 @@ void Application::Draw()
 	DrawTexture(m_map, 0, 0, WHITE);
 	m_player->Draw();
 
-	for (int i = 0; i < m_topWalls.size(); i++)
+	/*for (int i = 0; i < m_topWalls.size(); i++)
 	{
 		DrawRectangle(m_topWalls[i].x, m_topWalls[i].y, m_topWalls[i].width, m_topWalls[i].height, BLACK);
 	}
@@ -156,7 +163,11 @@ void Application::Draw()
 	for (int i = 0; i < m_bottomWalls.size(); i++)
 	{
 		DrawRectangle(m_bottomWalls[i].x, m_bottomWalls[i].y, m_bottomWalls[i].width, m_bottomWalls[i].height, BLACK);
-	}
+	}*/
+
+	//DrawCircleLines(m_seekChaosEmerald->GetTarget().x, m_seekChaosEmerald->GetTarget().y, 25.0f, BLACK);
+
+	m_graph->Draw();
 
 	//EndMode2D();
 
@@ -321,4 +332,36 @@ void Application::LoadRightWall()
 	CreateRightWall(795, 144, 5, 48);
 	CreateRightWall(795, 240, 5, 96);
 	CreateRightWall(795, 704, 5, 96);
+}
+
+Graph2D* Application::LoadGraph()
+{
+	Image image = LoadImage("./resources/graph.png");
+	Color* pixels = GetImageData(image);
+	Graph2D* graph = new Graph2D;
+
+	int tileWidth = 16;
+	int tileHeight = 16;
+
+	for (int y = 0; y < m_image.height; y += tileHeight)
+	{
+		for (int x = 0; x < m_image.width; x += tileWidth)
+		{
+ 			float xPos = x + 8;
+			float yPos = y + 8;
+
+			// Get pixel color from texture
+			auto c = pixels[y * m_image.width + x];
+			if (c.a > 0 && c.b < 210)
+			{
+				graph->SetDoorNode(xPos, yPos);
+			}
+			else if (c.a > 0)
+			{
+				graph->AddNode({ xPos, yPos });
+			}
+		}
+	}
+
+  	return graph;
 }

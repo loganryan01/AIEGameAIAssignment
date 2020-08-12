@@ -169,16 +169,23 @@
   <ItemGroup>
     <ClCompile Include="Agent.cpp" />
     <ClCompile Include="Application.cpp" />
+    <ClCompile Include="Graph2D.cpp" />
     <ClCompile Include="KeyboardBehaviour.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="PlayerAgent.cpp" />
+    <ClCompile Include="SeekChaosEmerald.cpp" />
+    <ClCompile Include="SeekMasterEmerald.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Agent.h" />
     <ClInclude Include="Application.h" />
     <ClInclude Include="Behaviour.h" />
+    <ClInclude Include="Graph.h" />
+    <ClInclude Include="Graph2D.h" />
     <ClInclude Include="KeyboardBehaviour.h" />
     <ClInclude Include="PlayerAgent.h" />
+    <ClInclude Include="SeekChaosEmerald.h" />
+    <ClInclude Include="SeekMasterEmerald.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

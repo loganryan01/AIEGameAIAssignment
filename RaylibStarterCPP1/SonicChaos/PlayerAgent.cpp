@@ -2,7 +2,7 @@
 
 PlayerAgent::PlayerAgent()
 {
-	m_texture = LoadTexture("C:/Users/logan/Desktop/AIEGameAIAssignment/Resources/myTilemap/Shadow.png");
+	m_texture = LoadTexture("./resources/Shadow.png");
 
 	m_topAABB = { m_position.x, m_position.y, (float)m_texture.width, 1.0f };
 	m_leftAABB = { m_position.x, m_position.y, 1.0f, (float)m_texture.height };
