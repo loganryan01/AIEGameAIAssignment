@@ -10,13 +10,10 @@ Agent::~Agent()
 // Update the agent and its behaviours
 void Agent::Update(float deltaTime)
 {
-	for (int i = 0; i < m_behaviourList.size(); i++)
-	{
-		Vector2 force = m_behaviourList[i]->Update(this, deltaTime);
+	Vector2 force = m_behaviour->Update(this, deltaTime);
 
-		m_velocity = (Vector2Add(m_velocity, Vector2Scale(force, deltaTime)));
-		m_position = (Vector2Add(m_position, Vector2Scale(m_velocity, deltaTime)));
-	}
+	m_velocity = (Vector2Add(m_velocity, Vector2Scale(force, deltaTime)));
+	m_position = (Vector2Add(m_position, Vector2Scale(m_velocity, deltaTime)));
 }
 
 // Draw the agent
@@ -26,7 +23,7 @@ void Agent::Draw()
 }
 
 // Add a behaviour to the agent
-void Agent::AddBehaviour(Behaviour* behaviour)
+void Agent::SetBehaviour(Behaviour* behaviour)
 {
-	m_behaviourList.push_back(behaviour);
+	m_behaviour = behaviour;
 }

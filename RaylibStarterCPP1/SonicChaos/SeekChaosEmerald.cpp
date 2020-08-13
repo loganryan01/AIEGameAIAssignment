@@ -25,5 +25,19 @@ Vector2 SeekChaosEmerald::Update(Agent* agent, float deltaTime)
 	desiredVelocity = Vector2Scale(Normalise(Vector2Subtract(m_target, agent->GetPosition())), m_maxVelocity);
 	steering = Vector2Subtract(desiredVelocity, agent->GetVelocity());
 
+	float distance = Vector2Distance(agent->GetPosition(), m_target);
+
+	if (distance < 16.0f && !m_myPath.empty())
+	{
+		m_myPath.pop_front();
+
+		if (m_myPath.empty())
+		{
+			return { 0,0 };
+		}
+
+		SetTarget(m_myPath.front());
+	}
+
 	return steering;
 }

@@ -8,5 +8,9 @@ public:
 	virtual ~Behaviour() {}
 
 	virtual Vector2 Update(Agent* agent, float deltaTime) = 0;
+
+
+protected:
+	
 };
 

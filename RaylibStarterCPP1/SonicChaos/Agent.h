@@ -17,13 +17,8 @@ public:
 	virtual void Draw();
 
 	// Add a behaviour to the agent
-	void AddBehaviour(Behaviour* behaviour);
-
-	// Remove beheaviour
-	void RemoveBehaviour()
-	{
-		m_behaviourList.pop_back();
-	}
+	void SetBehaviour(Behaviour* behaviour);
+	Behaviour* GetBehaviour() { return m_behaviour; }
 
 	// Movement functions
 	void SetPosition(Vector2 position) { m_position = position; }
@@ -32,7 +27,7 @@ public:
 	Vector2 GetVelocity() { return m_velocity; }
 
 protected:
-	std::vector<Behaviour*> m_behaviourList;
+	Behaviour* m_behaviour = nullptr;
 
 	Vector2 m_position = { 0, 0 };
 	Vector2 m_velocity = { 0, 0 };

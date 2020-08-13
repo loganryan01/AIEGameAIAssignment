@@ -42,40 +42,41 @@ void Application::Load()
 	for (int i = 0; i < 7; i++)
 	{
 		Texture2D texture;
-		m_chaosEmeralds[i] = new ChaosEmerald();
+		ChaosEmerald* chaosEmerald = new ChaosEmerald();
 
 		switch (i)
 		{
 		case 0: 
 			texture = LoadTexture("./resources/Chaos Emerald 1.png");
-			m_chaosEmeralds[i]->SetPosition({ 40, 24 });
+			chaosEmerald->SetPosition({ 40, 24 });
 			break;
 		case 1: 
 			texture = LoadTexture("./resources/Chaos Emerald 2.png"); 
-			m_chaosEmeralds[i]->SetPosition({ 40, 760 });
+			chaosEmerald->SetPosition({ 40, 760 });
 			break;
 		case 2: 
 			texture = LoadTexture("./resources/Chaos Emerald 3.png"); 
-			m_chaosEmeralds[i]->SetPosition({ 136, 376 });
+			chaosEmerald->SetPosition({ 136, 376 });
 			break;
 		case 3: 
 			texture = LoadTexture("./resources/Chaos Emerald 4.png"); 
-			m_chaosEmeralds[i]->SetPosition({ 392, 344 });
+			chaosEmerald->SetPosition({ 392, 344 });
 			break;
 		case 4: 
 			texture = LoadTexture("./resources/Chaos Emerald 5.png"); 
-			m_chaosEmeralds[i]->SetPosition({ 648, 376 });
+			chaosEmerald->SetPosition({ 648, 376 });
 			break;
 		case 5: 
 			texture = LoadTexture("./resources/Chaos Emerald 6.png"); 
-			m_chaosEmeralds[i]->SetPosition({ 744, 24 });
+			chaosEmerald->SetPosition({ 744, 24 });
 			break;
 		case 6: 
 			texture = LoadTexture("./resources/Chaos Emerald 7.png"); 
-			m_chaosEmeralds[i]->SetPosition({ 744, 760 });
+			chaosEmerald->SetPosition({ 744, 760 });
 			break;
 		}
-		m_chaosEmeralds[i]->SetTexture(texture);
+		chaosEmerald->SetTexture(texture);
+		m_chaosEmeralds.push_back(chaosEmerald);
 	}
 	
 	// Graph
@@ -91,7 +92,7 @@ void Application::Load()
 	m_seekMasterEmerald = new SeekMasterEmerald();
 	m_wanderBehaviour = new WanderBehaviour();
 	
-	m_player->AddBehaviour(m_wanderBehaviour);
+	m_player->SetBehaviour(m_wanderBehaviour);
 
 	// Camera
 	m_camera.target = { m_player->GetPosition().x + m_player->GetWidth() / 2, m_player->GetPosition().y + m_player->GetHeight() / 2 };
@@ -142,25 +143,75 @@ void Application::Unload()
 
 void Application::Update(float deltaTime)
 {
-	for (int i = 0; i < 7; i++)
+	// Switch from wander to seek chaos emerald
+	for (int i = 0; i < m_chaosEmeralds.size(); i++)
 	{
 		float distance = Vector2Distance(m_chaosEmeralds[i]->GetPosition(), m_player->GetPosition());
 
 		if (distance < 80.0f)
 		{
-			m_player->RemoveBehaviour();
-			m_player->AddBehaviour(m_seekChaosEmerald);
+			m_player->SetBehaviour(m_seekChaosEmerald);
+			
+			for (auto node : m_graph->GetNodes())
+			{
+				float distance = Vector2Distance(m_player->GetPosition(), node->data);
+
+				if (distance < 16.0f)
+				{
+					m_startingNode = node;
+				}
+			}
+
+			m_endNode = m_graph->DepthFirstSearch(m_startingNode, [&](Graph2D::Node* chosenNode) {
+				float distance = Vector2Distance(chosenNode->data, m_chaosEmeralds[i]->GetPosition());
+
+				if (distance <= 16.0f)
+				{
+					return true;
+				}
+
+				return false;
+				});
+
+			m_myPath = m_graph->dijkstrasSearch(m_startingNode, m_endNode);
+
+			for (auto node : m_myPath)
+			{
+				m_seekChaosEmerald->SetPathNode(node->data);
+			}
+
+			if (m_myPath.empty())
+			{
+				std::cout << "Path is empty";
+			}
+
+			m_seekChaosEmerald->SetTarget(m_myPath.front()->data);
+			
+			break;
 		}
 	}
-	
-	m_player->Update(deltaTime);
-	//m_camera.target = { m_player->GetPosition().x + m_player->GetWidth() / 2, m_player->GetPosition().y + m_player->GetHeight() / 2 };
 
-	// Switch from wander to seek chaos emerald
-	// - Check for a chaos emerald in the room
-	// -- Certain distance away from it?
-	
-	// - Get the position of the chaos emerald
+	// Switch from seek chaos emerald to wander 
+	if (m_player->GetBehaviour() == m_seekChaosEmerald)
+	{
+		float distance = Vector2Distance(m_seekChaosEmerald->GetTarget(), m_player->GetPosition());
+
+		if (distance < 20.0f)
+		{
+			// Remove chaos emerald
+			for (int i = 0; i < m_chaosEmeralds.size(); i++)
+			{
+				float distance = Vector2Distance(m_myPath.back()->data, m_chaosEmeralds[i]->GetPosition());
+				
+				if (distance < 20.0f)
+				{
+					m_chaosEmeralds[i]->SetPosition({ -10,-10 });
+					m_player->SetBehaviour(m_wanderBehaviour);
+					break;
+				}
+			}
+		}
+	}
 
 	// Get a new path
 	if (m_wanderBehaviour->GetPath().empty())
@@ -177,7 +228,7 @@ void Application::Update(float deltaTime)
 
 		m_endNode = m_graph->DepthFirstSearch(m_startingNode, [&](Graph2D::Node* chosenNode) {
 			float distance = Vector2Distance(chosenNode->data, m_startingNode->data);
-			
+
 			if (chosenNode->doorNode == true && chosenNode->beenHere == false && distance >= 32.0f)
 			{
 				return true;
@@ -186,7 +237,7 @@ void Application::Update(float deltaTime)
 			return false;
 			});
 
-		m_myPath = m_graph->AStarSearch(m_startingNode, m_endNode);
+		m_myPath = m_graph->dijkstrasSearch(m_startingNode, m_endNode);
 		m_myPath.back()->beenHere = true;
 
 		for (auto node : m_myPath)
@@ -196,6 +247,11 @@ void Application::Update(float deltaTime)
 
 		m_wanderBehaviour->SetTarget(m_myPath.front()->data);
 	}
+	
+	m_player->Update(deltaTime);
+	//m_camera.target = { m_player->GetPosition().x + m_player->GetWidth() / 2, m_player->GetPosition().y + m_player->GetHeight() / 2 };
+
+	
 }
 
 void Application::Draw()
@@ -208,7 +264,7 @@ void Application::Draw()
 
 	DrawTexture(m_map, 0, 0, WHITE);
 
-	for (int i = 0; i < 7; i++)
+	for (int i = 0; i < m_chaosEmeralds.size(); i++)
 	{
 		m_chaosEmeralds[i]->Draw();
 	}

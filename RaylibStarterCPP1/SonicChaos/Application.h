@@ -38,7 +38,7 @@ private:
 	Texture2D m_map;
 	Image m_image;
 
- 	ChaosEmerald* m_chaosEmeralds[7];
+ 	std::vector<ChaosEmerald*> m_chaosEmeralds;
 
 	Graph2D* m_graph = nullptr;
 
