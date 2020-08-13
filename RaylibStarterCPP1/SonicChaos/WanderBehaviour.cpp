@@ -1,6 +1,6 @@
-#include "SeekMasterEmerald.h"
+#include "WanderBehaviour.h"
 
-Vector2 SeekMasterEmerald::Normalise(Vector2 vector2)
+Vector2 WanderBehaviour::Normalise(Vector2 vector2)
 {
 	Vector2 normalisedVector = { 0, 0 };
 
@@ -17,13 +17,21 @@ Vector2 SeekMasterEmerald::Normalise(Vector2 vector2)
 	return normalisedVector;
 }
 
-Vector2 SeekMasterEmerald::Update(Agent* agent, float deltaTime)
+Vector2 WanderBehaviour::Update(Agent* agent, float deltaTime)
 {
 	Vector2 desiredVelocity = { 0, 0 };
 	Vector2 steering = { 0, 0 };
 
 	desiredVelocity = Vector2Scale(Normalise(Vector2Subtract(m_target, agent->GetPosition())), m_maxVelocity);
 	steering = Vector2Subtract(desiredVelocity, agent->GetVelocity());
+
+	float distance = Vector2Distance(agent->GetPosition(), m_target);
+
+	if (distance < 16.0f)
+	{
+		m_myPath.pop_front();
+		SetTarget(m_myPath.front());
+	}
 
 	return steering;
 }

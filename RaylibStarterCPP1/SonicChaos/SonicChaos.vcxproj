@@ -175,6 +175,7 @@
     <ClCompile Include="PlayerAgent.cpp" />
     <ClCompile Include="SeekChaosEmerald.cpp" />
     <ClCompile Include="SeekMasterEmerald.cpp" />
+    <ClCompile Include="WanderBehaviour.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Agent.h" />
@@ -186,6 +187,7 @@
     <ClInclude Include="PlayerAgent.h" />
     <ClInclude Include="SeekChaosEmerald.h" />
     <ClInclude Include="SeekMasterEmerald.h" />
+    <ClInclude Include="WanderBehaviour.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

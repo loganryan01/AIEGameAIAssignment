@@ -4,6 +4,7 @@
 #include "KeyboardBehaviour.h"
 #include "SeekChaosEmerald.h"
 #include "SeekMasterEmerald.h"
+#include "WanderBehaviour.h"
 #include "Graph2D.h"
 
 class Application
@@ -24,21 +25,14 @@ private:
 	int m_windowWidth;
 	int m_windowHeight;
 
-	void LoadLeftWall();
-	void LoadRightWall();
-
 	Graph2D* LoadGraph();
-
-	void CreateTopWall(float x, float y, float width, float height);
-	void CreateLeftWall(float x, float y, float width, float height);
-	void CreateRightWall(float x, float y, float width, float height);
-	void CreateBottomWall(float x, float y, float width, float height);
 
 	PlayerAgent* m_player = nullptr;
 	
 	KeyboardBehaviour* m_keyboardBehaviour = nullptr;
 	SeekChaosEmerald* m_seekChaosEmerald = nullptr;
 	SeekMasterEmerald* m_seekMasterEmerald = nullptr;
+	WanderBehaviour* m_wanderBehaviour = nullptr;
 
 	Texture2D m_map;
 	Image m_image;

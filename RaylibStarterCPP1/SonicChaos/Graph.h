@@ -4,6 +4,7 @@
 #include <functional>
 #include <algorithm>
 #include <list>
+#include <stack>
 
 template<class TNodeData, class TEdgeData>
 class Graph
@@ -22,6 +23,8 @@ public:
 
 		// Scores
 		float gScore;
+		float hScore;
+		float fScore;
 
 		// Parent node
 		Node* parent;
@@ -88,6 +91,92 @@ public:
 		}
 
 		return false;
+	}
+
+	float Heuristic(Node* target, Node* endNode)
+	{
+		float distance = Vector2Distance(target->data, endNode->data);
+
+		return distance;
+	}
+
+	std::list<Node*> AStarSearch(Node* startNode, Node* endNode)
+	{
+		std::list<Node*> path;
+
+		if (startNode == nullptr)
+		{
+			//std::cout << "No Starting Node" << std::endl;
+			return path;
+		}
+		else if (endNode == nullptr)
+		{
+			//std::cout << "No Ending Node" << std::endl;
+			return path;
+		}
+		else if (startNode == endNode)
+		{
+			//std::cout << "The starting node and the ending node is the same" << std::endl;
+			return path;
+		}
+
+		startNode->gScore = 0;
+		startNode->parent = nullptr;
+
+		std::list<Node*> openList;
+		std::list<Node*> closedList;
+
+		openList.push_back(startNode);
+
+		while (!openList.empty())
+		{
+			openList.sort();
+
+			Node* currentNode = openList.front();
+			//std::cout << currentNode->fScore << std::endl;
+
+			if (currentNode == endNode)
+			{
+				break;
+			}
+
+			openList.pop_front();
+			closedList.push_back(currentNode);
+
+			for (auto c : currentNode->connections)
+			{
+				if (!CheckList(closedList, c.to))
+				{
+					float gScore = currentNode->gScore + c.data;
+					float hScore = Heuristic(c.to, endNode);
+					float fScore = gScore + hScore;
+
+					if (!CheckList(openList, c.to))
+					{
+						c.to->gScore = gScore;
+						c.to->fScore = fScore;
+						c.to->parent = currentNode;
+						openList.push_back(c.to);
+					}
+					else if (fScore < c.to->fScore)
+					{
+						c.to->gScore = gScore;
+						c.to->fScore = fScore;
+						c.to->parent = currentNode;
+					}
+				}
+			}
+		}
+
+		Node* currentNode = endNode;
+
+		while (currentNode != nullptr)
+		{
+			path.push_front(currentNode);
+			currentNode = currentNode->parent;
+		}
+
+		return path;
 	}
 
 	std::list<Node*> dijkstrasSearch(Node* startNode, Node* endNode)
@@ -163,6 +252,54 @@ public:
 		}
 
 		return path;
+	}
+
+	bool CheckClosedList(std::list<Node*> closedList, Node* target)
+	{
+		// Check the closed list if the target exists
+		for (auto it = closedList.begin(); it != closedList.end(); ++it)
+		{
+			if (target == *it)
+			{
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	Node* DepthFirstSearch(Node* start,
+		std::function<bool(Node*)> predicate)
+	{
+		std::list<Node*> openList;
+		std::list<Node*> closedList;
+
+		openList.push_front(start);
+
+		while (!openList.empty())
+		{
+			Node* currentVertex = openList.front();
+
+			if (predicate(currentVertex))
+			{
+				return currentVertex;
+			}
+
+			openList.pop_front();
+			closedList.push_back(currentVertex);
+
+			for (auto c : currentVertex->connections)
+			{
+				if (CheckList(openList, c.to))
+				{
+					continue;
+				}
+				else
+				{
+					openList.push_front(c.to);
+				}
+			}
+		}
 	}
 
 protected:
