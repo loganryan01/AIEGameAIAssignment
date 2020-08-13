@@ -37,11 +37,15 @@ void Application::Load()
 	// Textures
 	m_image = LoadImage("./resources/tilemap.png");
 	m_map = LoadTextureFromImage(m_image);
+	m_chaosEmerald1 = LoadTexture("./resources/Chaos Emerald 1.png");
+	m_chaosEmerald2 = LoadTexture("./resources/Chaos Emerald 2.png");
+	
+	// Graph
 	m_graph = LoadGraph();
 	
 	// Agents
 	m_player = new PlayerAgent();
-	m_player->SetPosition({ 384, 752 });
+	m_player->SetPosition({ 392, 760 });
 
 	// Behaviours
 	m_keyboardBehaviour = new KeyboardBehaviour();
@@ -49,14 +53,25 @@ void Application::Load()
 	m_seekMasterEmerald = new SeekMasterEmerald();
 	m_wanderBehaviour = new WanderBehaviour();
 	
-	//m_player->AddBehaviour(m_wanderBehaviour);
+	m_player->AddBehaviour(m_wanderBehaviour);
 
 	// Camera
 	m_camera.target = { m_player->GetPosition().x + m_player->GetWidth() / 2, m_player->GetPosition().y + m_player->GetHeight() / 2 };
 	m_camera.offset = {(float)m_windowWidth / 2, (float)m_windowHeight / 2};
 	m_camera.zoom = 8.0f;
 
-	m_myPath = m_graph->AStarSearch(m_graph->GetNodes().front(), m_graph->DepthFirstSearch(m_graph->GetNodes().front(), [&](Graph2D::Node* chosenNode) {
+	// Calculate start node:
+	for (auto node : m_graph->GetNodes())
+	{
+		float distance = Vector2Distance(m_player->GetPosition(), node->data);
+
+		if (distance < 16.0f)
+		{
+			m_startingNode = node;
+		}
+	}
+
+	m_endNode = m_graph->DepthFirstSearch(m_startingNode, [&](Graph2D::Node* chosenNode) {
 		if (chosenNode->doorNode == true)
 		{
 			return true;
@@ -65,7 +80,10 @@ void Application::Load()
 		{
 			return false;
 		}
-		}));
+		});
+
+	m_myPath = m_graph->AStarSearch(m_startingNode, m_endNode);
+	m_myPath.back()->beenHere = true;
 
 	for (auto node : m_myPath)
 	{
@@ -88,6 +106,41 @@ void Application::Update(float deltaTime)
 {
 	m_player->Update(deltaTime);
 	//m_camera.target = { m_player->GetPosition().x + m_player->GetWidth() / 2, m_player->GetPosition().y + m_player->GetHeight() / 2 };
+
+	// Get a new path
+	if (m_wanderBehaviour->GetPath().empty())
+	{
+		for (auto node : m_graph->GetNodes())
+		{
+			float distance = Vector2Distance(m_player->GetPosition(), node->data);
+
+			if (distance < 16.0f)
+			{
+				m_startingNode = node;
+			}
+		}
+
+		m_endNode = m_graph->DepthFirstSearch(m_startingNode, [&](Graph2D::Node* chosenNode) {
+			float distance = Vector2Distance(chosenNode->data, m_startingNode->data);
+			
+			if (chosenNode->doorNode == true && chosenNode->beenHere == false && distance >= 32.0f)
+			{
+				return true;
+			}
+
+			return false;
+			});
+
+		m_myPath = m_graph->AStarSearch(m_startingNode, m_endNode);
+		m_myPath.back()->beenHere = true;
+
+		for (auto node : m_myPath)
+		{
+			m_wanderBehaviour->SetPathNode(node->data);
+		}
+
+		m_wanderBehaviour->SetTarget(m_myPath.front()->data);
+	}
 }
 
 void Application::Draw()
@@ -99,6 +152,8 @@ void Application::Draw()
 	//BeginMode2D(m_camera);
 
 	DrawTexture(m_map, 0, 0, WHITE);
+	DrawTexture(m_chaosEmerald1, 40, 24, WHITE);
+	DrawTexture(m_chaosEmerald2, 40, 760, WHITE);
 	m_player->Draw();
 
 	//DrawCircleLines(m_seekChaosEmerald->GetTarget().x, m_seekChaosEmerald->GetTarget().y, 25.0f, BLACK);

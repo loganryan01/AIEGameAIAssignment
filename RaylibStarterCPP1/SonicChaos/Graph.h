@@ -21,6 +21,12 @@ public:
 		// What type of node it is
 		bool doorNode = false;
 
+		// Have I already been here?
+		bool beenHere = false;
+
+		// Was there a Chaos Emerald in the room?
+		// bool chaosRoom = false;
+
 		// Scores
 		float gScore;
 		float hScore;
@@ -290,11 +296,11 @@ public:
 
 			for (auto c : currentVertex->connections)
 			{
-				if (CheckList(openList, c.to))
+				if (CheckList(openList, c.to) || CheckList(closedList, c.to))
 				{
 					continue;
 				}
-				else
+				else 
 				{
 					openList.push_front(c.to);
 				}

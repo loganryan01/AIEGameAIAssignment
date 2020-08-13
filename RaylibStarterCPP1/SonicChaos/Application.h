@@ -35,17 +35,16 @@ private:
 	WanderBehaviour* m_wanderBehaviour = nullptr;
 
 	Texture2D m_map;
+	Texture2D m_chaosEmerald1;
+	Texture2D m_chaosEmerald2;
 	Image m_image;
 
 	Graph2D* m_graph = nullptr;
 
 	Camera2D m_camera;
 
-	std::vector<Rectangle> m_topWalls;
-	std::vector<Rectangle> m_leftWalls;
-	std::vector<Rectangle> m_rightWalls;
-	std::vector<Rectangle> m_bottomWalls;
-
 	std::list<Graph2D::Node*> m_myPath;
+	Graph2D::Node* m_startingNode = nullptr;
+	Graph2D::Node* m_endNode = nullptr;
 };
 

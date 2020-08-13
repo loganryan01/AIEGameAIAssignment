@@ -15,6 +15,7 @@ public:
 	Vector2 GetTarget() { return m_target; }
 
 	void SetPathNode(Vector2 position) { m_myPath.push_back(position); }
+	std::list<Vector2> GetPath() { return m_myPath; }
 
 private:
 	Vector2 Normalise(Vector2 vector2);

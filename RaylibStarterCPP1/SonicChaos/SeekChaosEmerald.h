@@ -16,7 +16,6 @@ public:
 
 private:
 	Vector2 Normalise(Vector2 vector2);
-	bool OnArrival();
 
 	float m_maxVelocity = 100.0f;
 	Vector2 m_target = { 0, 0 };
