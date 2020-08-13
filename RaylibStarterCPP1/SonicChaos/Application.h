@@ -6,6 +6,7 @@
 #include "SeekMasterEmerald.h"
 #include "WanderBehaviour.h"
 #include "Graph2D.h"
+#include "ChaosEmerald.h"
 
 class Application
 {
@@ -35,9 +36,9 @@ private:
 	WanderBehaviour* m_wanderBehaviour = nullptr;
 
 	Texture2D m_map;
-	Texture2D m_chaosEmerald1;
-	Texture2D m_chaosEmerald2;
 	Image m_image;
+
+ 	ChaosEmerald* m_chaosEmeralds[7];
 
 	Graph2D* m_graph = nullptr;
 

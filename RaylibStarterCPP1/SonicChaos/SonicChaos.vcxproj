@@ -169,6 +169,8 @@
   <ItemGroup>
     <ClCompile Include="Agent.cpp" />
     <ClCompile Include="Application.cpp" />
+    <ClCompile Include="ChaosEmerald.cpp" />
+    <ClCompile Include="GameObject.cpp" />
     <ClCompile Include="Graph2D.cpp" />
     <ClCompile Include="KeyboardBehaviour.cpp" />
     <ClCompile Include="main.cpp" />
@@ -181,6 +183,8 @@
     <ClInclude Include="Agent.h" />
     <ClInclude Include="Application.h" />
     <ClInclude Include="Behaviour.h" />
+    <ClInclude Include="ChaosEmerald.h" />
+    <ClInclude Include="GameObject.h" />
     <ClInclude Include="Graph.h" />
     <ClInclude Include="Graph2D.h" />
     <ClInclude Include="KeyboardBehaviour.h" />

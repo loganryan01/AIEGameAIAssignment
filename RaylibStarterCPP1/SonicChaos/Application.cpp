@@ -37,8 +37,46 @@ void Application::Load()
 	// Textures
 	m_image = LoadImage("./resources/tilemap.png");
 	m_map = LoadTextureFromImage(m_image);
-	m_chaosEmerald1 = LoadTexture("./resources/Chaos Emerald 1.png");
-	m_chaosEmerald2 = LoadTexture("./resources/Chaos Emerald 2.png");
+
+	// Chaos Emeralds
+	for (int i = 0; i < 7; i++)
+	{
+		Texture2D texture;
+		m_chaosEmeralds[i] = new ChaosEmerald();
+
+		switch (i)
+		{
+		case 0: 
+			texture = LoadTexture("./resources/Chaos Emerald 1.png");
+			m_chaosEmeralds[i]->SetPosition({ 40, 24 });
+			break;
+		case 1: 
+			texture = LoadTexture("./resources/Chaos Emerald 2.png"); 
+			m_chaosEmeralds[i]->SetPosition({ 40, 760 });
+			break;
+		case 2: 
+			texture = LoadTexture("./resources/Chaos Emerald 3.png"); 
+			m_chaosEmeralds[i]->SetPosition({ 136, 376 });
+			break;
+		case 3: 
+			texture = LoadTexture("./resources/Chaos Emerald 4.png"); 
+			m_chaosEmeralds[i]->SetPosition({ 392, 344 });
+			break;
+		case 4: 
+			texture = LoadTexture("./resources/Chaos Emerald 5.png"); 
+			m_chaosEmeralds[i]->SetPosition({ 648, 376 });
+			break;
+		case 5: 
+			texture = LoadTexture("./resources/Chaos Emerald 6.png"); 
+			m_chaosEmeralds[i]->SetPosition({ 744, 24 });
+			break;
+		case 6: 
+			texture = LoadTexture("./resources/Chaos Emerald 7.png"); 
+			m_chaosEmeralds[i]->SetPosition({ 744, 760 });
+			break;
+		}
+		m_chaosEmeralds[i]->SetTexture(texture);
+	}
 	
 	// Graph
 	m_graph = LoadGraph();
@@ -104,8 +142,25 @@ void Application::Unload()
 
 void Application::Update(float deltaTime)
 {
+	for (int i = 0; i < 7; i++)
+	{
+		float distance = Vector2Distance(m_chaosEmeralds[i]->GetPosition(), m_player->GetPosition());
+
+		if (distance < 80.0f)
+		{
+			m_player->RemoveBehaviour();
+			m_player->AddBehaviour(m_seekChaosEmerald);
+		}
+	}
+	
 	m_player->Update(deltaTime);
 	//m_camera.target = { m_player->GetPosition().x + m_player->GetWidth() / 2, m_player->GetPosition().y + m_player->GetHeight() / 2 };
+
+	// Switch from wander to seek chaos emerald
+	// - Check for a chaos emerald in the room
+	// -- Certain distance away from it?
+	
+	// - Get the position of the chaos emerald
 
 	// Get a new path
 	if (m_wanderBehaviour->GetPath().empty())
@@ -152,8 +207,12 @@ void Application::Draw()
 	//BeginMode2D(m_camera);
 
 	DrawTexture(m_map, 0, 0, WHITE);
-	DrawTexture(m_chaosEmerald1, 40, 24, WHITE);
-	DrawTexture(m_chaosEmerald2, 40, 760, WHITE);
+
+	for (int i = 0; i < 7; i++)
+	{
+		m_chaosEmeralds[i]->Draw();
+	}
+
 	m_player->Draw();
 
 	//DrawCircleLines(m_seekChaosEmerald->GetTarget().x, m_seekChaosEmerald->GetTarget().y, 25.0f, BLACK);
