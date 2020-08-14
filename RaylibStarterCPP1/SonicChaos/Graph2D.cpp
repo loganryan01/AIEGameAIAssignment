@@ -20,6 +20,16 @@ void Graph2D::Draw()
 			DrawCircle(node->data.x, node->data.y, 8, GREEN);
 			DrawCircleLines(node->data.x, node->data.y, 8, DARKGREEN);
 		}
+		else if (node->chaosNode == true)
+		{
+			DrawCircle(node->data.x, node->data.y, 8, BLUE);
+			DrawCircleLines(node->data.x, node->data.y, 8, DARKBLUE);
+		}
+		else if (node->masterNode == true)
+		{
+			DrawCircle(node->data.x, node->data.y, 8, BROWN);
+			DrawCircleLines(node->data.x, node->data.y, 8, DARKBROWN);
+		}
 		else
 		{
 			DrawCircle(node->data.x, node->data.y, 8, GRAY);
@@ -53,6 +63,24 @@ void Graph2D::SetDoorNode(float xPos, float yPos)
 	Node* node = new Node();
 	node->data = { xPos, yPos };
 	node->doorNode = true;
+
+	m_nodes.push_back(node);
+}
+
+void Graph2D::SetChaosNode(float xPos, float yPos)
+{
+	Node* node = new Node();
+	node->data = { xPos, yPos };
+	node->chaosNode = true;
+
+	m_nodes.push_back(node);
+}
+
+void Graph2D::SetMasterNode(float xPos, float yPos)
+{
+	Node* node = new Node();
+	node->data = { xPos, yPos };
+	node->masterNode = true;
 
 	m_nodes.push_back(node);
 }

@@ -7,6 +7,7 @@
 #include "WanderBehaviour.h"
 #include "Graph2D.h"
 #include "ChaosEmerald.h"
+#include "MasterEmerald.h"
 
 class Application
 {
@@ -28,6 +29,9 @@ private:
 
 	Graph2D* LoadGraph();
 
+	std::list<Graph2D::Node*> PathToDoorNode();
+	std::list<Graph2D::Node*> PathToChaosNode();
+
 	PlayerAgent* m_player = nullptr;
 	
 	KeyboardBehaviour* m_keyboardBehaviour = nullptr;
@@ -39,6 +43,7 @@ private:
 	Image m_image;
 
  	std::vector<ChaosEmerald*> m_chaosEmeralds;
+	MasterEmerald* m_masterEmerald = nullptr;
 
 	Graph2D* m_graph = nullptr;
 

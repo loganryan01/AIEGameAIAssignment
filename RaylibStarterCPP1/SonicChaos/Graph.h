@@ -20,6 +20,8 @@ public:
 
 		// What type of node it is
 		bool doorNode = false;
+		bool chaosNode = false;
+		bool masterNode = false;
 
 		// Have I already been here?
 		bool beenHere = false;
@@ -218,7 +220,6 @@ public:
 			openList.sort();
 
 			Node* currentNode = openList.front();
-			//std::cout << currentNode->gScore << std::endl;
 
 			if (currentNode == endNode)
 			{

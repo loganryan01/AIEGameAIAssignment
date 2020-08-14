@@ -78,6 +78,11 @@ void Application::Load()
 		chaosEmerald->SetTexture(texture);
 		m_chaosEmeralds.push_back(chaosEmerald);
 	}
+
+	// Master Emerald
+	m_masterEmerald = new MasterEmerald();
+	m_masterEmerald->SetTexture(LoadTexture("./resources/Master Emerald.png"));
+	m_masterEmerald->SetPosition({ 384 , 16 });
 	
 	// Graph
 	m_graph = LoadGraph();
@@ -143,115 +148,72 @@ void Application::Unload()
 
 void Application::Update(float deltaTime)
 {
-	// Switch from wander to seek chaos emerald
-	for (int i = 0; i < m_chaosEmeralds.size(); i++)
+	float distanceToEndOfPath = 0.0f;
+	
+	// Check if we are at the end of the path
+	if (!m_myPath.empty())
 	{
-		float distance = Vector2Distance(m_chaosEmeralds[i]->GetPosition(), m_player->GetPosition());
-
-		if (distance < 80.0f)
-		{
-			m_player->SetBehaviour(m_seekChaosEmerald);
-			
-			for (auto node : m_graph->GetNodes())
-			{
-				float distance = Vector2Distance(m_player->GetPosition(), node->data);
-
-				if (distance < 16.0f)
-				{
-					m_startingNode = node;
-				}
-			}
-
-			m_endNode = m_graph->DepthFirstSearch(m_startingNode, [&](Graph2D::Node* chosenNode) {
-				float distance = Vector2Distance(chosenNode->data, m_chaosEmeralds[i]->GetPosition());
-
-				if (distance <= 16.0f)
-				{
-					return true;
-				}
-
-				return false;
-				});
-
-			m_myPath = m_graph->dijkstrasSearch(m_startingNode, m_endNode);
-
-			for (auto node : m_myPath)
-			{
-				m_seekChaosEmerald->SetPathNode(node->data);
-			}
-
-			if (m_myPath.empty())
-			{
-				std::cout << "Path is empty";
-			}
-
-			m_seekChaosEmerald->SetTarget(m_myPath.front()->data);
-			
-			break;
-		}
+		distanceToEndOfPath = Vector2Distance(m_player->GetPosition(), m_myPath.back()->data);
 	}
 
-	// Switch from seek chaos emerald to wander 
-	if (m_player->GetBehaviour() == m_seekChaosEmerald)
+	// Check if we have a path
+	if (m_myPath.empty() || distanceToEndOfPath < 8.0f)
 	{
-		float distance = Vector2Distance(m_seekChaosEmerald->GetTarget(), m_player->GetPosition());
+		std::cout << "Calculating new path to ";
+		m_myPath.clear();
 
-		if (distance < 20.0f)
+		if (m_player->GetBehaviour() == m_wanderBehaviour)
 		{
-			// Remove chaos emerald
-			for (int i = 0; i < m_chaosEmeralds.size(); i++)
+			std::cout << "Door node" << std::endl;
+			m_myPath = PathToDoorNode();
+
+			// Switch from wander to seek chaos emerald if the distance from the player to the chaos node is less than 48.0f
+			for (auto node : m_graph->GetNodes())
 			{
-				float distance = Vector2Distance(m_myPath.back()->data, m_chaosEmeralds[i]->GetPosition());
-				
-				if (distance < 20.0f)
+				float distanceToChaosNode = Vector2Distance(m_player->GetPosition(), node->data);
+
+				if (node->chaosNode == true && node->beenHere == false && distanceToChaosNode < 80.0f && m_player->GetBehaviour() == m_wanderBehaviour)
 				{
-					m_chaosEmeralds[i]->SetPosition({ -10,-10 });
-					m_player->SetBehaviour(m_wanderBehaviour);
+					m_player->SetBehaviour(m_seekChaosEmerald);
+					std::cout << "Changed to seek chaos emerald" << std::endl;
+					m_myPath.clear();
 					break;
 				}
 			}
 		}
-	}
-
-	// Get a new path
-	if (m_wanderBehaviour->GetPath().empty())
-	{
-		for (auto node : m_graph->GetNodes())
+		else if (m_player->GetBehaviour() == m_seekChaosEmerald)
 		{
-			float distance = Vector2Distance(m_player->GetPosition(), node->data);
+			std::cout << "Chaos node" << std::endl;
+			m_myPath = PathToChaosNode();
 
-			if (distance < 16.0f)
+			// Switch from seek chaos emerald to wander once the chaos emerald is collected
+			if (m_player->GetBehaviour() == m_seekChaosEmerald)
 			{
-				m_startingNode = node;
+				// Remove chaos emerald
+				for (int i = 0; i < m_chaosEmeralds.size(); i++)
+				{
+					float distanceToChaosEmerald = Vector2Distance(m_player->GetPosition(), m_chaosEmeralds[i]->GetPosition());
+					std::cout << distanceToChaosEmerald << std::endl;
+
+					if (distanceToChaosEmerald < 64.0f)
+					{
+						std::cout << "Got emerald" << std::endl;
+						m_myPath.back()->beenHere = true;
+						m_chaosEmeralds.erase(m_chaosEmeralds.begin() + i);
+						m_player->SetBehaviour(m_wanderBehaviour);
+						std::cout << "Changed to wander" << std::endl;
+						m_seekChaosEmerald->GetPath().clear();
+						m_seekChaosEmerald->SetTarget({ NULL, NULL });
+						break;
+					}
+				}
 			}
 		}
-
-		m_endNode = m_graph->DepthFirstSearch(m_startingNode, [&](Graph2D::Node* chosenNode) {
-			float distance = Vector2Distance(chosenNode->data, m_startingNode->data);
-
-			if (chosenNode->doorNode == true && chosenNode->beenHere == false && distance >= 32.0f)
-			{
-				return true;
-			}
-
-			return false;
-			});
-
-		m_myPath = m_graph->dijkstrasSearch(m_startingNode, m_endNode);
-		m_myPath.back()->beenHere = true;
-
-		for (auto node : m_myPath)
-		{
-			m_wanderBehaviour->SetPathNode(node->data);
-		}
-
-		m_wanderBehaviour->SetTarget(m_myPath.front()->data);
 	}
 	
 	m_player->Update(deltaTime);
-	//m_camera.target = { m_player->GetPosition().x + m_player->GetWidth() / 2, m_player->GetPosition().y + m_player->GetHeight() / 2 };
 
-	
+	//m_camera.target = { m_player->GetPosition().x + m_player->GetWidth() / 2, m_player->GetPosition().y + m_player->GetHeight() / 2 };
 }
 
 void Application::Draw()
@@ -269,9 +231,14 @@ void Application::Draw()
 		m_chaosEmeralds[i]->Draw();
 	}
 
+	m_masterEmerald->Draw();
+
 	m_player->Draw();
 
-	//DrawCircleLines(m_seekChaosEmerald->GetTarget().x, m_seekChaosEmerald->GetTarget().y, 25.0f, BLACK);
+	if (!m_myPath.empty())
+	{
+		DrawCircleLines(m_myPath.back()->data.x, m_myPath.back()->data.y, 16.0f, BLACK);
+	}
 
 	m_graph->Draw();
 	m_graph->DrawPath(m_myPath);
@@ -298,17 +265,25 @@ Graph2D* Application::LoadGraph()
  			float xPos = x + 8;
 			float yPos = y + 8;
 
-			// Get pixel color from texture
+			// Get pixel color from texture c.b == 144
 			auto c = pixels[y * m_image.width + x];
-			if (c.a > 0 && c.b < 210)
+			if (c.a > 0 && c.b == 144)
 			{
 				graph->SetDoorNode(xPos, yPos);
 				
 			}
+			else if (c.a > 0 && c.b == 153)
+			{
+				graph->SetChaosNode(xPos, yPos);
+				
+			}
+			else if (c.a > 0 && c.b == 236)
+			{
+				graph->SetMasterNode(xPos, yPos);
+			}
 			else if (c.a > 0)
 			{
 				graph->AddNode({ xPos, yPos });
-				
 			}
 		}
 	}
@@ -319,4 +294,90 @@ Graph2D* Application::LoadGraph()
 	}
 
   	return graph;
+}
+
+std::list<Graph2D::Node*> Application::PathToDoorNode()
+{
+	Graph2D::Node* startingNode = nullptr;
+	Graph2D::Node* endNode = nullptr;
+	std::list<Graph2D::Node*> doorPath;
+
+	// Get Starting node
+	for (auto node : m_graph->GetNodes())
+	{
+		float distanceToStartNode = Vector2Distance(m_player->GetPosition(), node->data);
+
+		if (distanceToStartNode < 16.0f)
+		{
+			startingNode = node;
+			break;
+		}
+	}
+
+	// End node should be a door node that we haven't visited yet
+	endNode = m_graph->DepthFirstSearch(startingNode, [&](Graph2D::Node* chosenNode) {
+		float distance = Vector2Distance(startingNode->data, chosenNode->data);
+
+		if (chosenNode->doorNode == true && chosenNode->beenHere == false && distance >= 32.0f)
+		{
+			return true;
+		}
+
+		return false;
+		});
+
+	doorPath = m_graph->dijkstrasSearch(startingNode, endNode);
+	doorPath.back()->beenHere = true;
+
+	for (auto node : doorPath)
+	{
+		m_wanderBehaviour->SetPathNode(node->data);
+	}
+
+	m_wanderBehaviour->SetTarget(doorPath.front()->data);
+
+	return doorPath;
+}
+
+std::list<Graph2D::Node*> Application::PathToChaosNode()
+{
+	Graph2D::Node* startingNode = nullptr;
+	Graph2D::Node* endNode = nullptr;
+	std::list<Graph2D::Node*> chaosPath;
+	
+	for (auto node : m_graph->GetNodes())
+	{
+		float distanceToStartNode = Vector2Distance(m_player->GetPosition(), node->data);
+
+		if (distanceToStartNode < 16.0f)
+		{
+			startingNode = node;
+			break;
+		}
+	}
+
+	endNode = m_graph->DepthFirstSearch(startingNode, [&](Graph2D::Node* chosenNode) {
+		float distanceToChosenNode = Vector2Distance(startingNode->data, chosenNode->data);
+
+		// If the chosen node is a chaos node, we haven't been to that node, and we are close to it
+		if (chosenNode->chaosNode == true && chosenNode->beenHere == false && distanceToChosenNode < 80.0f)
+		{
+			std::cout << "Chaos Node has been found" << std::endl;
+			return true;
+		}
+
+		return false;
+		});
+
+	chaosPath = m_graph->dijkstrasSearch(startingNode, endNode);
+	chaosPath.back()->beenHere = true;
+
+	for (auto node : chaosPath)
+	{
+		m_seekChaosEmerald->SetPathNode(node->data);
+	}
+
+	m_seekChaosEmerald->SetTarget(chaosPath.front()->data);
+
+	return chaosPath;
 }
