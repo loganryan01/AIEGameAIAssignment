@@ -3,6 +3,11 @@
 
 #include "raylib.h"
 
+// TODO:
+// - Attack and stun behaviour
+// - Game States
+// - EXTRA: Health and health packs
+
 Application::Application(int windowWidth, int windowHeight) :
 	m_windowWidth(windowWidth), m_windowHeight(windowHeight)
 {
@@ -156,60 +161,112 @@ void Application::Update(float deltaTime)
 		distanceToEndOfPath = Vector2Distance(m_player->GetPosition(), m_myPath.back()->data);
 	}
 
-	// Check if we have a path
-	if (m_myPath.empty() || distanceToEndOfPath < 8.0f)
+	//----- Behaviour switching -----
+	if (distanceToEndOfPath < 12.0f)
 	{
-		std::cout << "Calculating new path to ";
-		m_myPath.clear();
-
 		if (m_player->GetBehaviour() == m_wanderBehaviour)
 		{
-			std::cout << "Door node" << std::endl;
-			m_myPath = PathToDoorNode();
-
+			if (m_playerScore == 7)
+			{
+				m_player->SetBehaviour(m_seekMasterEmerald);
+			}
+			
 			// Switch from wander to seek chaos emerald if the distance from the player to the chaos node is less than 48.0f
 			for (auto node : m_graph->GetNodes())
 			{
 				float distanceToChaosNode = Vector2Distance(m_player->GetPosition(), node->data);
 
-				if (node->chaosNode == true && node->beenHere == false && distanceToChaosNode < 80.0f && m_player->GetBehaviour() == m_wanderBehaviour)
+				if (node->chaosNode == true)
+				{
+					std::cout << distanceToChaosNode << std::endl;
+				}
+
+				if (node->chaosNode == true && node->beenHere == false && distanceToChaosNode < 78.0f)
 				{
 					m_player->SetBehaviour(m_seekChaosEmerald);
-					std::cout << "Changed to seek chaos emerald" << std::endl;
-					m_myPath.clear();
 					break;
 				}
 			}
 		}
 		else if (m_player->GetBehaviour() == m_seekChaosEmerald)
 		{
-			std::cout << "Chaos node" << std::endl;
-			m_myPath = PathToChaosNode();
-
-			// Switch from seek chaos emerald to wander once the chaos emerald is collected
-			if (m_player->GetBehaviour() == m_seekChaosEmerald)
+			// Remove chaos emerald if there is one 
+			for (int i = 0; i < m_chaosEmeralds.size(); i++)
 			{
-				// Remove chaos emerald
-				for (int i = 0; i < m_chaosEmeralds.size(); i++)
-				{
-					float distanceToChaosEmerald = Vector2Distance(m_player->GetPosition(), m_chaosEmeralds[i]->GetPosition());
-					std::cout << distanceToChaosEmerald << std::endl;
+				float distanceToChaosEmerald = Vector2Distance(m_player->GetPosition(), m_chaosEmeralds[i]->GetPosition());
 
-					if (distanceToChaosEmerald < 64.0f)
-					{
-						std::cout << "Got emerald" << std::endl;
-						m_myPath.back()->beenHere = true;
-						m_chaosEmeralds.erase(m_chaosEmeralds.begin() + i);
-						m_player->SetBehaviour(m_wanderBehaviour);
-						std::cout << "Changed to wander" << std::endl;
-						m_seekChaosEmerald->GetPath().clear();
-						m_seekChaosEmerald->SetTarget({ NULL, NULL });
-						break;
-					}
+				if (distanceToChaosEmerald < 44.0f)
+				{
+					m_chaosEmeralds.erase(m_chaosEmeralds.begin() + i);
+					m_playerScore++;
+					m_player->SetBehaviour(m_wanderBehaviour);
+					break;
 				}
+				else if (i == m_chaosEmeralds.size() - 1)
+				{
+					m_player->SetBehaviour(m_wanderBehaviour);
+					break;
+				}
+			}
+
+			if (m_playerScore == 7)
+			{
+				m_player->SetBehaviour(m_seekMasterEmerald);
+			}
+		}
+		else if (m_player->GetBehaviour() == m_seekMasterEmerald)
+		{
+			if (m_playerScore < 7)
+			{
+				m_player->SetBehaviour(m_wanderBehaviour);
 			}
 		}
 	}
+
+	//----- Pathfinding -----
+	// Check if we have a path or at the end of the path
+	if (m_myPath.empty() || distanceToEndOfPath < 12.0f)
+	{
+		m_myPath.clear();
+
+		if (m_player->GetBehaviour() == m_wanderBehaviour)
+		{
+			m_myPath = PathToDoorNode();
+		}
+		else if (m_player->GetBehaviour() == m_seekChaosEmerald)
+		{
+			m_myPath = PathToChaosNode();
+		}
+		else if (m_player->GetBehaviour() == m_seekMasterEmerald)
+		{
+			m_myPath = PathToMasterNode();
+		}
+	}
+
+	//----- Collision -----
+	for (auto barricade : m_graph->GetBarricades())
+	{
+		if (CheckCollisionRecs(m_player->GetTopAABB(), barricade) && m_player->GetVelocity().y < 0)
+		{
+			m_player->SetVelocity({ m_player->GetVelocity().x, 0 });
+		}
+
+		if (CheckCollisionRecs(m_player->GetBottomAABB(), barricade) && m_player->GetVelocity().y > 0)
+		{
+			m_player->SetVelocity({ m_player->GetVelocity().x, 0 });
+		}
+		
+		if (CheckCollisionRecs(m_player->GetLeftAABB(), barricade) && m_player->GetVelocity().x < 0)
+		{
+			m_player->SetVelocity({ 0, m_player->GetVelocity().y });
+		}
+
+		if (CheckCollisionRecs(m_player->GetRightAABB(), barricade) && m_player->GetVelocity().x > 0)
+		{
+			m_player->SetVelocity({ 0, m_player->GetVelocity().y });
+		}
+	}
+	
 	
 	m_player->Update(deltaTime);
 
@@ -280,6 +337,10 @@ Graph2D* Application::LoadGraph()
 			else if (c.a > 0 && c.b == 236)
 			{
 				graph->SetMasterNode(xPos, yPos);
+			}
+			else if (c.a > 0 && c.b == 0)
+			{
+				graph->AddBarricade(xPos, yPos);
 			}
 			else if (c.a > 0)
 			{
@@ -358,19 +419,24 @@ std::list<Graph2D::Node*> Application::PathToChaosNode()
 
 	endNode = m_graph->DepthFirstSearch(startingNode, [&](Graph2D::Node* chosenNode) {
 		float distanceToChosenNode = Vector2Distance(startingNode->data, chosenNode->data);
-
+		
 		// If the chosen node is a chaos node, we haven't been to that node, and we are close to it
-		if (chosenNode->chaosNode == true && chosenNode->beenHere == false && distanceToChosenNode < 80.0f)
+		if (chosenNode->chaosNode == true && chosenNode->beenHere == false && distanceToChosenNode < 66.0f)
 		{
-			std::cout << "Chaos Node has been found" << std::endl;
 			return true;
 		}
 
 		return false;
 		});
 
-	chaosPath = m_graph->dijkstrasSearch(startingNode, endNode);
-	chaosPath.back()->beenHere = true;
+	if (endNode == nullptr)
+	{
+		m_player->SetBehaviour(m_wanderBehaviour);
+		return chaosPath;
+	}
+
+	chaosPath = m_graph->AStarSearch(startingNode, endNode);
+	chaosPath.back()->chaosNode = false;
 
 	for (auto node : chaosPath)
 	{
@@ -380,4 +446,46 @@ std::list<Graph2D::Node*> Application::PathToChaosNode()
 	m_seekChaosEmerald->SetTarget(chaosPath.front()->data);
 
 	return chaosPath;
+}
+
+std::list<Graph2D::Node*> Application::PathToMasterNode()
+{
+	Graph2D::Node* startingNode = nullptr;
+	Graph2D::Node* endNode = nullptr;
+	std::list<Graph2D::Node*>masterPath;
+
+	for (auto node : m_graph->GetNodes())
+	{
+		float distanceToStartNode = Vector2Distance(m_player->GetPosition(), node->data);
+
+		if (distanceToStartNode < 16.0f)
+		{
+			startingNode = node;
+			break;
+		}
+	}
+
+	endNode = m_graph->DepthFirstSearch(startingNode, [&](Graph2D::Node* chosenNode) {
+
+		// If the chosen node is the master node
+		if (chosenNode->masterNode == true)
+		{
+			std::cout << "Master Node has been found" << std::endl;
+			return true;
+		}
+
+		return false;
+		});
+
+	masterPath = m_graph->AStarSearch(startingNode, endNode);
+	masterPath.back()->beenHere = true;
+
+	for (auto node : masterPath)
+	{
+		m_seekMasterEmerald->SetPathNode(node->data);
+	}
+
+	m_seekMasterEmerald->SetTarget(masterPath.front()->data);
+
+	return masterPath;
 }

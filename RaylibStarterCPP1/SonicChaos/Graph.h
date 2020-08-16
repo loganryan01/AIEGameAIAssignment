@@ -6,6 +6,8 @@
 #include <list>
 #include <stack>
 
+#include "raylib.h"
+
 template<class TNodeData, class TEdgeData>
 class Graph
 {
@@ -81,10 +83,20 @@ public:
 		nodeA->connections.push_back({ nodeB, data });
 	}
 
+	void AddBarricade(float xPos, float yPos)
+	{
+		m_barricades.push_back({ xPos, yPos, 16, 16 });
+	}
+
 	// Get nodes
 	const std::vector<Node*>& GetNodes()
 	{
 		return m_nodes;
+	}
+
+	const std::vector<Rectangle>& GetBarricades()
+	{
+		return m_barricades;
 	}
 
 	bool CheckList(std::list<Node*> List, Node* target)
@@ -312,4 +324,5 @@ public:
 protected:
 
 	std::vector<Node*> m_nodes;
+	std::vector<Rectangle> m_barricades;
 };

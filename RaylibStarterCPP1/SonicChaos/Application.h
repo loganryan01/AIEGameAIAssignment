@@ -24,31 +24,42 @@ public:
 	void Draw();
 
 private:
-	int m_windowWidth;
-	int m_windowHeight;
-
 	Graph2D* LoadGraph();
 
+	// PathtoMasternode distance 144.0f
 	std::list<Graph2D::Node*> PathToDoorNode();
 	std::list<Graph2D::Node*> PathToChaosNode();
+	std::list<Graph2D::Node*> PathToMasterNode();
 
+private:
+	int m_windowWidth;
+	int m_windowHeight;
+	int m_playerScore = 0;
+
+	// Agents
 	PlayerAgent* m_player = nullptr;
 	
+	// Behaviours
 	KeyboardBehaviour* m_keyboardBehaviour = nullptr;
 	SeekChaosEmerald* m_seekChaosEmerald = nullptr;
 	SeekMasterEmerald* m_seekMasterEmerald = nullptr;
 	WanderBehaviour* m_wanderBehaviour = nullptr;
 
+	// Map
 	Texture2D m_map;
 	Image m_image;
 
+	// Emeralds
  	std::vector<ChaosEmerald*> m_chaosEmeralds;
 	MasterEmerald* m_masterEmerald = nullptr;
 
+	// Graph
 	Graph2D* m_graph = nullptr;
 
+	// Camera
 	Camera2D m_camera;
 
+	// Pathfinding
 	std::list<Graph2D::Node*> m_myPath;
 	Graph2D::Node* m_startingNode = nullptr;
 	Graph2D::Node* m_endNode = nullptr;
