@@ -4,7 +4,7 @@
 #include "raylib.h"
 
 // TODO:
-// - Attack and stun behaviour
+// - Flee and stun behaviour
 // - Game States
 // - EXTRA: Health and health packs
 
@@ -101,6 +101,7 @@ void Application::Load()
 	m_seekChaosEmerald = new SeekChaosEmerald();
 	m_seekMasterEmerald = new SeekMasterEmerald();
 	m_wanderBehaviour = new WanderBehaviour();
+	m_attackBehaviour = new AttackBehaviour();
 	
 	m_player->SetBehaviour(m_wanderBehaviour);
 
@@ -166,20 +167,10 @@ void Application::Update(float deltaTime)
 	{
 		if (m_player->GetBehaviour() == m_wanderBehaviour)
 		{
-			if (m_playerScore == 7)
-			{
-				m_player->SetBehaviour(m_seekMasterEmerald);
-			}
-			
 			// Switch from wander to seek chaos emerald if the distance from the player to the chaos node is less than 48.0f
 			for (auto node : m_graph->GetNodes())
 			{
 				float distanceToChaosNode = Vector2Distance(m_player->GetPosition(), node->data);
-
-				if (node->chaosNode == true)
-				{
-					std::cout << distanceToChaosNode << std::endl;
-				}
 
 				if (node->chaosNode == true && node->beenHere == false && distanceToChaosNode < 78.0f)
 				{
@@ -187,6 +178,20 @@ void Application::Update(float deltaTime)
 					break;
 				}
 			}
+
+			float distanceToPlayer = Vector2Distance(m_enemy->GetPosition(), m_player->GetPosition());
+
+			if (m_playerScore == 7)
+			{
+				m_player->SetBehaviour(m_seekMasterEmerald);
+			}
+			else if (m_enemyScore + m_playerScore == 7 && distanceToPlayer < 80.0f && m_enemy->GetAttackCharger() == 600.0f)
+			{
+				// No more chaos emeralds, nobody has 7, enemy can see the player, attack is ready
+				m_enemy->SetBehaviour(m_attackBehaviour);
+			}
+
+			
 		}
 		else if (m_player->GetBehaviour() == m_seekChaosEmerald)
 		{
@@ -221,6 +226,14 @@ void Application::Update(float deltaTime)
 				m_player->SetBehaviour(m_wanderBehaviour);
 			}
 		}
+		else if (m_enemy->GetBehaviour() == m_attackBehaviour)
+		{
+			// Switch to flee once we have attacked
+			if (m_enemy->GetAttackCharger() < 600.0f)
+			{
+
+			}
+		}
 	}
 
 	//----- Pathfinding -----
@@ -240,6 +253,10 @@ void Application::Update(float deltaTime)
 		else if (m_player->GetBehaviour() == m_seekMasterEmerald)
 		{
 			m_myPath = PathToMasterNode();
+		}
+		else if (m_enemy->GetBehaviour() == m_attackBehaviour)
+		{
+			m_attackBehaviour->SetTarget(m_player->GetPosition());
 		}
 	}
 
@@ -267,10 +284,16 @@ void Application::Update(float deltaTime)
 		}
 	}
 	
+	//----- Attack -----
+	// Charge the attack bar
+	if (m_player->GetAttackCharger() < 600.0f)
+	{
+		m_player->IncrementAttackCharger();
+	}
 	
 	m_player->Update(deltaTime);
 
-	//m_camera.target = { m_player->GetPosition().x + m_player->GetWidth() / 2, m_player->GetPosition().y + m_player->GetHeight() / 2 };
+	m_camera.target = { m_player->GetPosition().x + m_player->GetWidth() / 2, m_player->GetPosition().y + m_player->GetHeight() / 2 };
 }
 
 void Application::Draw()
@@ -295,6 +318,11 @@ void Application::Draw()
 	if (!m_myPath.empty())
 	{
 		DrawCircleLines(m_myPath.back()->data.x, m_myPath.back()->data.y, 16.0f, BLACK);
+	}
+
+	if (m_player->GetAttackCharger() == 600.0f)
+	{
+		std::cout << "Attack is ready" << std::endl;
 	}
 
 	m_graph->Draw();
@@ -425,8 +453,10 @@ std::list<Graph2D::Node*> Application::PathToChaosNode()
 		{
 			return true;
 		}
-
-		return false;
+		else
+		{
+			return false;
+		}
 		});
 
 	if (endNode == nullptr)
@@ -470,11 +500,12 @@ std::list<Graph2D::Node*> Application::PathToMasterNode()
 		// If the chosen node is the master node
 		if (chosenNode->masterNode == true)
 		{
-			std::cout << "Master Node has been found" << std::endl;
 			return true;
 		}
-
-		return false;
+		else
+		{
+			return false;
+		}
 		});
 
 	masterPath = m_graph->AStarSearch(startingNode, endNode);

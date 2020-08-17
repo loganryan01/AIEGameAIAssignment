@@ -51,6 +51,12 @@
     <ClCompile Include="MasterEmerald.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="AttackBehaviour.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="EnemyAgent.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Application.h">
@@ -90,6 +96,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="MasterEmerald.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="AttackBehaviour.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="EnemyAgent.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
