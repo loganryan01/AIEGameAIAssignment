@@ -1,6 +1,6 @@
-#include "AttackBehaviour.h"
+#include "FleeBehaviour.h"
 
-Vector2 AttackBehaviour::Normalise(Vector2 vector2)
+Vector2 FleeBehaviour::Normalise(Vector2 vector2)
 {
 	Vector2 normalisedVector = { 0, 0 };
 
@@ -17,17 +17,19 @@ Vector2 AttackBehaviour::Normalise(Vector2 vector2)
 	return normalisedVector;
 }
 
-Vector2 AttackBehaviour::Update(Agent* agent, float deltaTime)
+Vector2 FleeBehaviour::Update(Agent* agent, float deltaTime)
 {
 	Vector2 desiredVelocity = { 0, 0 };
 	Vector2 steering = { 0, 0 };
 
-	desiredVelocity = Vector2Scale(Normalise(Vector2Subtract(m_target, agent->GetPosition())), m_maxVelocity);
+	desiredVelocity = Vector2Scale(Normalise(Vector2Subtract(agent->GetPosition(), m_target)), m_maxVelocity);
 	steering = Vector2Subtract(desiredVelocity, agent->GetVelocity());
+
+	// if the enemy is within range of the player run away from him/her
 
 	float distance = Vector2Distance(agent->GetPosition(), m_target);
 
-	if (distance < agent->GetAttackRadius())
+	if (distance < 80.0f)
 	{
 		agent->ResetAttackCharger();
 	}

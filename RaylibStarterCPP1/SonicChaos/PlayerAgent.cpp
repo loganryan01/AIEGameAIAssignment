@@ -28,6 +28,7 @@ void PlayerAgent::Update(float deltaTime)
 void PlayerAgent::Draw()
 {
 	DrawTexture(m_texture, m_position.x, m_position.y, WHITE);
+
 	DrawRectangleLines(m_topAABB.x, m_topAABB.y, m_topAABB.width, m_topAABB.height, BLACK);
 	DrawRectangleLines(m_leftAABB.x, m_leftAABB.y, m_leftAABB.width, m_leftAABB.height, BLACK);
 	DrawRectangleLines(m_rightAABB.x, m_rightAABB.y, m_rightAABB.width, m_rightAABB.height, BLACK);

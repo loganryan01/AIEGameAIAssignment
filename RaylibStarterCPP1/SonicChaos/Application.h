@@ -8,6 +8,7 @@
 #include "SeekMasterEmerald.h"
 #include "WanderBehaviour.h"
 #include "AttackBehaviour.h"
+#include "FleeBehaviour.h"
 
 #include "Graph2D.h"
 
@@ -52,6 +53,7 @@ private:
 	SeekMasterEmerald* m_seekMasterEmerald = nullptr;
 	WanderBehaviour* m_wanderBehaviour = nullptr;
 	AttackBehaviour* m_attackBehaviour = nullptr;
+	FleeBehaviour* m_fleeBehaviour = nullptr;
 
 	// Map
 	Texture2D m_map;

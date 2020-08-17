@@ -94,7 +94,10 @@ void Application::Load()
 	
 	// Agents
 	m_player = new PlayerAgent();
-	m_player->SetPosition({ 392, 760 });
+	m_player->SetPosition({ 424, 760 });
+
+	m_enemy = new EnemyAgent();
+	m_enemy->SetPosition({ 392, 760 });
 
 	// Behaviours
 	m_keyboardBehaviour = new KeyboardBehaviour();
@@ -102,18 +105,20 @@ void Application::Load()
 	m_seekMasterEmerald = new SeekMasterEmerald();
 	m_wanderBehaviour = new WanderBehaviour();
 	m_attackBehaviour = new AttackBehaviour();
+	m_fleeBehaviour = new FleeBehaviour();
 	
-	m_player->SetBehaviour(m_wanderBehaviour);
+	m_player->SetBehaviour(m_keyboardBehaviour);
+	m_enemy->SetBehaviour(m_wanderBehaviour);
 
 	// Camera
 	m_camera.target = { m_player->GetPosition().x + m_player->GetWidth() / 2, m_player->GetPosition().y + m_player->GetHeight() / 2 };
 	m_camera.offset = {(float)m_windowWidth / 2, (float)m_windowHeight / 2};
-	m_camera.zoom = 8.0f;
+	m_camera.zoom = 5.0f;
 
 	// Calculate start node:
 	for (auto node : m_graph->GetNodes())
 	{
-		float distance = Vector2Distance(m_player->GetPosition(), node->data);
+		float distance = Vector2Distance(m_enemy->GetPosition(), node->data);
 
 		if (distance < 16.0f)
 		{
@@ -146,7 +151,14 @@ void Application::Load()
 void Application::Unload()
 {
 	delete m_keyboardBehaviour;
+	delete m_seekChaosEmerald;
+	delete m_seekMasterEmerald;
+	delete m_wanderBehaviour;
+	delete m_attackBehaviour;
+	delete m_fleeBehaviour;
+
 	delete m_player;
+	delete m_enemy;
 	UnloadTexture(m_map);
 
 	CloseWindow();
@@ -159,71 +171,69 @@ void Application::Update(float deltaTime)
 	// Check if we are at the end of the path
 	if (!m_myPath.empty())
 	{
-		distanceToEndOfPath = Vector2Distance(m_player->GetPosition(), m_myPath.back()->data);
+		distanceToEndOfPath = Vector2Distance(m_enemy->GetPosition(), m_myPath.back()->data);
 	}
 
 	//----- Behaviour switching -----
 	if (distanceToEndOfPath < 12.0f)
 	{
-		if (m_player->GetBehaviour() == m_wanderBehaviour)
+		if (m_enemy->GetBehaviour() == m_wanderBehaviour)
 		{
 			// Switch from wander to seek chaos emerald if the distance from the player to the chaos node is less than 48.0f
 			for (auto node : m_graph->GetNodes())
 			{
-				float distanceToChaosNode = Vector2Distance(m_player->GetPosition(), node->data);
+				float distanceToChaosNode = Vector2Distance(m_enemy->GetPosition(), node->data);
 
 				if (node->chaosNode == true && node->beenHere == false && distanceToChaosNode < 78.0f)
 				{
-					m_player->SetBehaviour(m_seekChaosEmerald);
+					m_enemy->SetBehaviour(m_seekChaosEmerald);
 					break;
 				}
 			}
 
 			float distanceToPlayer = Vector2Distance(m_enemy->GetPosition(), m_player->GetPosition());
 
-			if (m_playerScore == 7)
+			if (m_enemyScore == 7)
 			{
-				m_player->SetBehaviour(m_seekMasterEmerald);
+				m_enemy->SetBehaviour(m_seekMasterEmerald);
 			}
 			else if (m_enemyScore + m_playerScore == 7 && distanceToPlayer < 80.0f && m_enemy->GetAttackCharger() == 600.0f)
 			{
 				// No more chaos emeralds, nobody has 7, enemy can see the player, attack is ready
 				m_enemy->SetBehaviour(m_attackBehaviour);
 			}
-
-			
 		}
-		else if (m_player->GetBehaviour() == m_seekChaosEmerald)
+		else if (m_enemy->GetBehaviour() == m_seekChaosEmerald)
 		{
 			// Remove chaos emerald if there is one 
 			for (int i = 0; i < m_chaosEmeralds.size(); i++)
 			{
-				float distanceToChaosEmerald = Vector2Distance(m_player->GetPosition(), m_chaosEmeralds[i]->GetPosition());
+				float distanceToChaosEmerald = Vector2Distance(m_enemy->GetPosition(), m_chaosEmeralds[i]->GetPosition());
 
 				if (distanceToChaosEmerald < 44.0f)
 				{
 					m_chaosEmeralds.erase(m_chaosEmeralds.begin() + i);
-					m_playerScore++;
-					m_player->SetBehaviour(m_wanderBehaviour);
+					m_enemyScore++;
+					m_enemy->SetBehaviour(m_wanderBehaviour);
 					break;
 				}
 				else if (i == m_chaosEmeralds.size() - 1)
 				{
-					m_player->SetBehaviour(m_wanderBehaviour);
+					m_enemy->SetBehaviour(m_wanderBehaviour);
 					break;
 				}
 			}
 
-			if (m_playerScore == 7)
+			if (m_enemyScore == 7)
 			{
-				m_player->SetBehaviour(m_seekMasterEmerald);
+				m_enemy->SetBehaviour(m_seekMasterEmerald);
 			}
 		}
-		else if (m_player->GetBehaviour() == m_seekMasterEmerald)
+		else if (m_enemy->GetBehaviour() == m_seekMasterEmerald)
 		{
-			if (m_playerScore < 7)
+			if (m_enemyScore < 7)
 			{
-				m_player->SetBehaviour(m_wanderBehaviour);
+				m_enemy->SetBehaviour(m_wanderBehaviour);
 			}
 		}
 		else if (m_enemy->GetBehaviour() == m_attackBehaviour)
@@ -231,7 +241,24 @@ void Application::Update(float deltaTime)
 			// Switch to flee once we have attacked
 			if (m_enemy->GetAttackCharger() < 600.0f)
 			{
+				m_enemy->SetBehaviour(m_fleeBehaviour);
+			}
+		}
+		else if (m_enemy->GetBehaviour() == m_fleeBehaviour)
+		{
+			// Center of the player texture
+			float playerXPos = m_player->GetWidth() / 2.0f;
+			float playerYPos = m_player->GetHeight() / 2.0f;
 
+			// Center of the enemy texture
+			float enemyXPos = m_enemy->GetWidth() / 2.0f;
+			float enemyYPos = m_enemy->GetHeight() / 2.0f;
+			
+			float distanceFromPlayer = Vector2Distance({ playerXPos, playerYPos }, { enemyXPos, enemyYPos });
+
+			if (distanceFromPlayer > 80.0f)
+			{
+				m_enemy->SetBehaviour(m_wanderBehaviour);
 			}
 		}
 	}
@@ -242,21 +269,33 @@ void Application::Update(float deltaTime)
 	{
 		m_myPath.clear();
 
-		if (m_player->GetBehaviour() == m_wanderBehaviour)
+		if (m_enemy->GetBehaviour() == m_wanderBehaviour)
 		{
 			m_myPath = PathToDoorNode();
 		}
-		else if (m_player->GetBehaviour() == m_seekChaosEmerald)
+		else if (m_enemy->GetBehaviour() == m_seekChaosEmerald)
 		{
 			m_myPath = PathToChaosNode();
 		}
-		else if (m_player->GetBehaviour() == m_seekMasterEmerald)
+		else if (m_enemy->GetBehaviour() == m_seekMasterEmerald)
 		{
 			m_myPath = PathToMasterNode();
 		}
 		else if (m_enemy->GetBehaviour() == m_attackBehaviour)
 		{
-			m_attackBehaviour->SetTarget(m_player->GetPosition());
+			// Center of the player texture
+			float xPos = m_player->GetWidth() / 2.0f;
+			float yPos = m_player->GetHeight() / 2.0f;
+			
+			m_attackBehaviour->SetTarget({ xPos, yPos });
+		}
+		else if (m_enemy->GetBehaviour() == m_fleeBehaviour)
+		{
+			// Center of the player texture
+			float xPos = m_player->GetWidth() / 2.0f;
+			float yPos = m_player->GetHeight() / 2.0f;
+			
+			m_fleeBehaviour->SetTarget({ xPos, yPos });
 		}
 	}
 
@@ -282,6 +321,26 @@ void Application::Update(float deltaTime)
 		{
 			m_player->SetVelocity({ 0, m_player->GetVelocity().y });
 		}
+
+		if (CheckCollisionRecs(m_enemy->GetTopAABB(), barricade) && m_enemy->GetVelocity().y < 0)
+		{
+			m_enemy->SetVelocity({ m_enemy->GetVelocity().x, 0 });
+		}
+
+		if (CheckCollisionRecs(m_enemy->GetBottomAABB(), barricade) && m_enemy->GetVelocity().y > 0)
+		{
+			m_enemy->SetVelocity({ m_enemy->GetVelocity().x, 0 });
+		}
+
+		if (CheckCollisionRecs(m_enemy->GetLeftAABB(), barricade) && m_enemy->GetVelocity().x < 0)
+		{
+			m_enemy->SetVelocity({ 0, m_enemy->GetVelocity().y });
+		}
+
+		if (CheckCollisionRecs(m_enemy->GetRightAABB(), barricade) && m_enemy->GetVelocity().x > 0)
+		{
+			m_enemy->SetVelocity({ 0, m_enemy->GetVelocity().y });
+		}
 	}
 	
 	//----- Attack -----
@@ -290,8 +349,27 @@ void Application::Update(float deltaTime)
 	{
 		m_player->IncrementAttackCharger();
 	}
+
+	if (m_enemy->GetAttackCharger() < 600.0f)
+	{
+		m_enemy->IncrementAttackCharger();
+	}
+
+	// Remove chaos emerald if there is one 
+	for (int i = 0; i < m_chaosEmeralds.size(); i++)
+	{
+		float distanceToChaosEmerald = Vector2Distance(m_player->GetPosition(), m_chaosEmeralds[i]->GetPosition());
+
+		if (distanceToChaosEmerald < 44.0f)
+		{
+			m_chaosEmeralds.erase(m_chaosEmeralds.begin() + i);
+			m_playerScore++;
+			break;
+		}
+	}
 	
 	m_player->Update(deltaTime);
+	m_enemy->Update(deltaTime);
 
 	m_camera.target = { m_player->GetPosition().x + m_player->GetWidth() / 2, m_player->GetPosition().y + m_player->GetHeight() / 2 };
 }
@@ -302,7 +380,12 @@ void Application::Draw()
 
 	ClearBackground(RAYWHITE);
 
-	//BeginMode2D(m_camera);
+	if (m_player->GetAttackCharger() == 600.0f)
+	{
+		DrawText("Attack is Ready", 10, 10, 14, BLACK);
+	}
+
+	BeginMode2D(m_camera);
 
 	DrawTexture(m_map, 0, 0, WHITE);
 
@@ -314,21 +397,19 @@ void Application::Draw()
 	m_masterEmerald->Draw();
 
 	m_player->Draw();
+	m_enemy->Draw();
 
-	if (!m_myPath.empty())
+	DrawCircleLines(m_player->GetPosition().x + m_player->GetWidth() / 2.0f, m_player->GetPosition().y + m_player->GetHeight() / 2.0f, 80.0f, BLACK);
+
+	/*if (!m_myPath.empty())
 	{
 		DrawCircleLines(m_myPath.back()->data.x, m_myPath.back()->data.y, 16.0f, BLACK);
-	}
-
-	if (m_player->GetAttackCharger() == 600.0f)
-	{
-		std::cout << "Attack is ready" << std::endl;
-	}
+	}*/
 
 	m_graph->Draw();
 	m_graph->DrawPath(m_myPath);
 
-	//EndMode2D();
+	EndMode2D();
 
 	EndDrawing();
 }
@@ -394,7 +475,7 @@ std::list<Graph2D::Node*> Application::PathToDoorNode()
 	// Get Starting node
 	for (auto node : m_graph->GetNodes())
 	{
-		float distanceToStartNode = Vector2Distance(m_player->GetPosition(), node->data);
+		float distanceToStartNode = Vector2Distance(m_enemy->GetPosition(), node->data);
 
 		if (distanceToStartNode < 16.0f)
 		{
@@ -436,7 +517,7 @@ std::list<Graph2D::Node*> Application::PathToChaosNode()
 	
 	for (auto node : m_graph->GetNodes())
 	{
-		float distanceToStartNode = Vector2Distance(m_player->GetPosition(), node->data);
+		float distanceToStartNode = Vector2Distance(m_enemy->GetPosition(), node->data);
 
 		if (distanceToStartNode < 16.0f)
 		{
@@ -482,11 +563,11 @@ std::list<Graph2D::Node*> Application::PathToMasterNode()
 {
 	Graph2D::Node* startingNode = nullptr;
 	Graph2D::Node* endNode = nullptr;
-	std::list<Graph2D::Node*>masterPath;
+	std::list<Graph2D::Node*> masterPath;
 
 	for (auto node : m_graph->GetNodes())
 	{
-		float distanceToStartNode = Vector2Distance(m_player->GetPosition(), node->data);
+		float distanceToStartNode = Vector2Distance(m_enemy->GetPosition(), node->data);
 
 		if (distanceToStartNode < 16.0f)
 		{
