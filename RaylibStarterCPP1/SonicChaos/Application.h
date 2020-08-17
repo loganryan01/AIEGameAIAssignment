@@ -32,10 +32,11 @@ public:
 private:
 	Graph2D* LoadGraph();
 
-	// PathtoMasternode distance 144.0f
 	std::list<Graph2D::Node*> PathToDoorNode();
 	std::list<Graph2D::Node*> PathToChaosNode();
 	std::list<Graph2D::Node*> PathToMasterNode();
+	std::list<Graph2D::Node*> PathToAttackPlayer();
+	std::list<Graph2D::Node*> PathToAvoidPlayer();
 
 private:
 	int m_windowWidth;

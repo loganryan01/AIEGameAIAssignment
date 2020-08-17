@@ -4,7 +4,8 @@
 #include "raylib.h"
 
 // TODO:
-// - Flee and stun behaviour
+// - Stun behaviour
+// - Fix flee and attack behaviour
 // - Game States
 // - EXTRA: Health and health packs
 
@@ -236,30 +237,50 @@ void Application::Update(float deltaTime)
 				m_enemy->SetBehaviour(m_wanderBehaviour);
 			}
 		}
-		else if (m_enemy->GetBehaviour() == m_attackBehaviour)
+	}
+
+	if (m_enemy->GetBehaviour() == m_attackBehaviour)
+	{
+		// Center of the player texture
+		float playerXPos = m_player->GetPosition().x + m_player->GetWidth() / 2.0f;
+		float playerYPos = m_player->GetPosition().y + m_player->GetHeight() / 2.0f;
+
+		// Center of the enemy texture
+		float enemyXPos = m_enemy->GetPosition().x + m_enemy->GetWidth() / 2.0f;
+		float enemyYPos = m_enemy->GetPosition().y + m_enemy->GetHeight() / 2.0f;
+
+		float distanceToPlayer = Vector2Distance({ playerXPos, playerYPos }, { enemyXPos, enemyYPos });
+
+		if (distanceToPlayer < m_enemy->GetAttackRadius())
 		{
-			// Switch to flee once we have attacked
-			if (m_enemy->GetAttackCharger() < 600.0f)
-			{
-				m_enemy->SetBehaviour(m_fleeBehaviour);
-			}
+			m_enemy->ResetAttackCharger();
 		}
-		else if (m_enemy->GetBehaviour() == m_fleeBehaviour)
+
+		// Switch to flee once we have attacked
+		if (m_enemy->GetAttackCharger() < 600.0f)
 		{
-			// Center of the player texture
-			float playerXPos = m_player->GetWidth() / 2.0f;
-			float playerYPos = m_player->GetHeight() / 2.0f;
+			m_enemy->SetBehaviour(m_fleeBehaviour);
+		}
+		else if (distanceToPlayer > 80.0f)
+		{
+			m_enemy->SetBehaviour(m_wanderBehaviour);
+		}
+	}
+	else if (m_enemy->GetBehaviour() == m_fleeBehaviour)
+	{
+		// Center of the player texture
+		float playerXPos = m_player->GetPosition().x + m_player->GetWidth() / 2.0f;
+		float playerYPos = m_player->GetPosition().y + m_player->GetHeight() / 2.0f;
 
-			// Center of the enemy texture
-			float enemyXPos = m_enemy->GetWidth() / 2.0f;
-			float enemyYPos = m_enemy->GetHeight() / 2.0f;
-			
-			float distanceFromPlayer = Vector2Distance({ playerXPos, playerYPos }, { enemyXPos, enemyYPos });
+		// Center of the enemy texture
+		float enemyXPos = m_enemy->GetPosition().x + m_enemy->GetWidth() / 2.0f;
+		float enemyYPos = m_enemy->GetPosition().y + m_enemy->GetHeight() / 2.0f;
 
-			if (distanceFromPlayer > 80.0f)
-			{
-				m_enemy->SetBehaviour(m_wanderBehaviour);
-			}
+		float distanceFromPlayer = Vector2Distance({ playerXPos, playerYPos }, { enemyXPos, enemyYPos });
+
+		if (distanceFromPlayer > 80.0f)
+		{
+			m_enemy->SetBehaviour(m_wanderBehaviour);
 		}
 	}
 
@@ -283,21 +304,48 @@ void Application::Update(float deltaTime)
 		}
 		else if (m_enemy->GetBehaviour() == m_attackBehaviour)
 		{
-			// Center of the player texture
-			float xPos = m_player->GetWidth() / 2.0f;
-			float yPos = m_player->GetHeight() / 2.0f;
-			
-			m_attackBehaviour->SetTarget({ xPos, yPos });
+			m_myPath = PathToAttackPlayer();
+
+			if (m_myPath.empty())
+			{
+				// Center of the player texture
+				float playerXPos = m_player->GetPosition().x + m_player->GetWidth() / 2.0f;
+				float playerYPos = m_player->GetPosition().y + m_player->GetHeight() / 2.0f;
+
+				// Center of the enemy texture
+				float enemyXPos = m_enemy->GetPosition().x + m_enemy->GetWidth() / 2.0f;
+				float enemyYPos = m_enemy->GetPosition().y + m_enemy->GetHeight() / 2.0f;
+
+				float distanceFromPlayer = Vector2Distance({ playerXPos, playerYPos }, { enemyXPos, enemyYPos });
+
+				if (distanceFromPlayer < 80.0f)
+				{
+					m_attackBehaviour->SetTarget({ playerXPos, playerYPos });
+				}
+			}
 		}
 		else if (m_enemy->GetBehaviour() == m_fleeBehaviour)
 		{
-			// Center of the player texture
-			float xPos = m_player->GetWidth() / 2.0f;
-			float yPos = m_player->GetHeight() / 2.0f;
-			
-			m_fleeBehaviour->SetTarget({ xPos, yPos });
+			m_myPath = PathToAvoidPlayer();
 		}
 	}
+
+	//if (m_enemy->GetBehaviour() == m_attackBehaviour)
+	//{
+	//	// Center of the player texture
+	//	float xPos = m_player->GetPosition().x + m_player->GetWidth() / 2.0f;
+	//	float yPos = m_player->GetPosition().y + m_player->GetHeight() / 2.0f;
+
+	//	m_attackBehaviour->SetTarget({ xPos, yPos });
+	//}
+	//else if (m_enemy->GetBehaviour() == m_fleeBehaviour)
+	//{
+	//	// Center of the player texture
+	//	float xPos = m_player->GetPosition().x + m_player->GetWidth() / 2.0f;
+	//	float yPos = m_player->GetPosition().y + m_player->GetHeight() / 2.0f;
+
+	//	m_fleeBehaviour->SetTarget({ xPos, yPos });
+	//}
 
 	//----- Collision -----
 	for (auto barricade : m_graph->GetBarricades())
@@ -362,6 +410,19 @@ void Application::Update(float deltaTime)
 
 		if (distanceToChaosEmerald < 44.0f)
 		{
+			for (auto node : m_graph->GetNodes())
+			{
+				if (node->chaosNode == true)
+				{
+					float distanceToChaosNode = Vector2Distance(m_player->GetPosition(), node->data);
+
+					if (distanceToChaosNode < 66.0f)
+					{
+						node->chaosNode = false;
+					}
+				}
+			}
+			
 			m_chaosEmeralds.erase(m_chaosEmeralds.begin() + i);
 			m_playerScore++;
 			break;
@@ -380,14 +441,17 @@ void Application::Draw()
 
 	ClearBackground(RAYWHITE);
 
-	if (m_player->GetAttackCharger() == 600.0f)
-	{
-		DrawText("Attack is Ready", 10, 10, 14, BLACK);
-	}
-
-	BeginMode2D(m_camera);
+	//BeginMode2D(m_camera);
 
 	DrawTexture(m_map, 0, 0, WHITE);
+
+	if (m_enemy->GetAttackCharger() == 600.0f &&
+		CheckCollisionCircleRec({ m_enemy->GetPosition().x + (float)m_enemy->GetWidth() / 2.0f, m_enemy->GetPosition().y + (float)m_enemy->GetHeight() / 2.0f },
+			m_enemy->GetAttackRadius(), { m_player->GetPosition().x, m_player->GetPosition().y, (float)m_player->GetWidth(), (float)m_player->GetHeight() }) &&
+		m_enemy->GetBehaviour() == m_attackBehaviour)
+	{
+		DrawCircle(m_enemy->GetPosition().x + m_enemy->GetWidth() / 2, m_enemy->GetPosition().y + m_enemy->GetHeight() / 2, m_enemy->GetAttackRadius(), PURPLE);
+	}
 
 	for (int i = 0; i < m_chaosEmeralds.size(); i++)
 	{
@@ -399,17 +463,38 @@ void Application::Draw()
 	m_player->Draw();
 	m_enemy->Draw();
 
-	DrawCircleLines(m_player->GetPosition().x + m_player->GetWidth() / 2.0f, m_player->GetPosition().y + m_player->GetHeight() / 2.0f, 80.0f, BLACK);
-
-	/*if (!m_myPath.empty())
-	{
-		DrawCircleLines(m_myPath.back()->data.x, m_myPath.back()->data.y, 16.0f, BLACK);
-	}*/
+	
 
 	m_graph->Draw();
 	m_graph->DrawPath(m_myPath);
 
-	EndMode2D();
+	//EndMode2D();
+
+	if (m_player->GetAttackCharger() == 600.0f)
+	{
+		DrawText("Attack is Ready", 10, 10, 14, BLACK);
+	}
+
+	if (m_enemy->GetBehaviour() == m_wanderBehaviour)
+	{
+		DrawText("Enemy is wandering", 10, 30, 14, BLACK);
+	}
+	else if (m_enemy->GetBehaviour() == m_seekChaosEmerald)
+	{
+		DrawText("Enemy is seeking chaos emerald", 10, 30, 14, BLACK);
+	}
+	else if (m_enemy->GetBehaviour() == m_seekMasterEmerald)
+	{
+		DrawText("Enemy is seeking master emerald", 10, 30, 14, BLACK);
+	}
+	else if (m_enemy->GetBehaviour() == m_attackBehaviour)
+	{
+		DrawText("Enemy is attacking", 10, 30, 14, BLACK);
+	}
+	else if (m_enemy->GetBehaviour() == m_fleeBehaviour)
+	{
+		DrawText("Enemy is fleeing", 10, 30, 14, BLACK);
+	}
 
 	EndDrawing();
 }
@@ -600,4 +685,100 @@ std::list<Graph2D::Node*> Application::PathToMasterNode()
 	m_seekMasterEmerald->SetTarget(masterPath.front()->data);
 
 	return masterPath;
+}
+
+std::list<Graph2D::Node*> Application::PathToAttackPlayer()
+{
+	Graph2D::Node* startingNode = nullptr;
+	Graph2D::Node* endNode = nullptr;
+	std::list<Graph2D::Node*> playerPath;
+
+	for (auto node : m_graph->GetNodes())
+	{
+		float distanceToStartNode = Vector2Distance(m_enemy->GetPosition(), node->data);
+
+		if (distanceToStartNode < 16.0f)
+		{
+			startingNode = node;
+			break;
+		}
+	}
+
+	endNode = m_graph->DepthFirstSearch(startingNode, [&](Graph2D::Node* chosenNode) {
+
+		float distanceToPlayer = Vector2Distance(m_player->GetPosition(), chosenNode->data);
+
+		if (distanceToPlayer < 16.0f)
+		{
+			return true;
+		}
+		else
+		{
+			return false;
+		}
+		});
+
+	if (endNode == nullptr)
+	{
+		return playerPath;
+	}
+
+	playerPath = m_graph->AStarSearch(startingNode, endNode);
+
+	for (auto node : playerPath)
+	{
+		m_attackBehaviour->SetPathNode(node->data);
+	}
+
+	m_attackBehaviour->SetTarget(playerPath.front()->data);
+
+	return playerPath;
+}
+
+std::list<Graph2D::Node*> Application::PathToAvoidPlayer()
+{
+	Graph2D::Node* startingNode = nullptr;
+	Graph2D::Node* endNode = nullptr;
+	std::list<Graph2D::Node*> fleePath;
+
+	for (auto node : m_graph->GetNodes())
+	{
+		float distanceToStartNode = Vector2Distance(m_enemy->GetPosition(), node->data);
+
+		if (distanceToStartNode < 80.0f)
+		{
+			startingNode = node;
+			break;
+		}
+	}
+
+	endNode = m_graph->DepthFirstSearch(startingNode, [&](Graph2D::Node* chosenNode) {
+
+		float distanceFromPlayer = Vector2Distance(m_player->GetPosition(), chosenNode->data);
+
+		if (distanceFromPlayer > 80.0f)
+		{
+			return true;
+		}
+		else
+		{
+			return false;
+		}
+		});
+
+	if (endNode == nullptr)
+	{
+		return fleePath;
+	}
+
+	fleePath = m_graph->AStarSearch(startingNode, endNode);
+
+	for (auto node : fleePath)
+	{
+		m_fleeBehaviour->SetPathNode(node->data);
+	}
+
+	m_fleeBehaviour->SetTarget(fleePath.front()->data);
+
+	return fleePath;
 }

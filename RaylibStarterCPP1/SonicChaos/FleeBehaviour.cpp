@@ -29,9 +29,16 @@ Vector2 FleeBehaviour::Update(Agent* agent, float deltaTime)
 
 	float distance = Vector2Distance(agent->GetPosition(), m_target);
 
-	if (distance < 80.0f)
+	if (distance < 16.0f && !m_myPath.empty())
 	{
-		agent->ResetAttackCharger();
+		m_myPath.pop_front();
+
+		if (m_myPath.empty())
+		{
+			return { 0,0 };
+		}
+
+		SetTarget(m_myPath.front());
 	}
 
 	return steering;
