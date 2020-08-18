@@ -2,6 +2,7 @@
 #include "GameStateManager.h"
 #include "IGameState.h"
 #include "PlayState.h"
+#include "SplashState.h"
 
 #include "raylib.h"
 
@@ -25,9 +26,11 @@ void Application::Run()
 	InitWindow(m_windowWidth, m_windowHeight, "Sonic Chaos");
 
 	m_gameStateManager = new GameStateManager();
-	m_gameStateManager->SetState("Play", new PlayState(this));
+	//m_gameStateManager->SetState("Play", new PlayState(this));
+	m_gameStateManager->SetState("Splash", new SplashState(this));
 
-	m_gameStateManager->PushState("Play");
+	//m_gameStateManager->PushState("Play");
+	m_gameStateManager->PushState("Splash");
 	while (!WindowShouldClose())
 	{
 		float dt = GetFrameTime();

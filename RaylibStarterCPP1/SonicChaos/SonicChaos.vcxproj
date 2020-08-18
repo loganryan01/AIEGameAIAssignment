@@ -113,7 +113,7 @@
       <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <CompileAs>Default</CompileAs>
-      <AdditionalIncludeDirectories>$(SolutionDir)Raygui\src;$(SolutionDir)Raylib\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)Raygui\src;$(SolutionDir)Raylib\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -183,6 +183,7 @@
     <ClCompile Include="PlayState.cpp" />
     <ClCompile Include="SeekChaosEmerald.cpp" />
     <ClCompile Include="SeekMasterEmerald.cpp" />
+    <ClCompile Include="SplashState.cpp" />
     <ClCompile Include="WanderBehaviour.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -204,6 +205,7 @@
     <ClInclude Include="PlayState.h" />
     <ClInclude Include="SeekChaosEmerald.h" />
     <ClInclude Include="SeekMasterEmerald.h" />
+    <ClInclude Include="SplashState.h" />
     <ClInclude Include="WanderBehaviour.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

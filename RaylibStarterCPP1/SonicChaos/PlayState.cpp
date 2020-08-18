@@ -2,9 +2,9 @@
 
 PlayState::PlayState(Application* app) : m_app(app)
 {
-	m_map = { 0, 0, 0, 0, 0 };
-	m_image = { 0, 0, 0, 0, 0 };
-	m_camera = { {0,0}, {0,0}, 0, 0 };
+	m_map = { 0 };
+	m_image = { 0 };
+	m_camera = { 0 };
 }
 
 PlayState::~PlayState()
@@ -120,8 +120,6 @@ void PlayState::Unload()
 
 	// Unload map
 	UnloadTexture(m_map);
-
-	CloseWindow();
 }
 
 void PlayState::Update(float deltaTime)
