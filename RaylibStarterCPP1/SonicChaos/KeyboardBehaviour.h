@@ -15,6 +15,6 @@ public:
 	}
 
 private:
-	float m_speedIncrement = 10.0f;
+	float m_speedIncrement = 100.0f;
 };
 
