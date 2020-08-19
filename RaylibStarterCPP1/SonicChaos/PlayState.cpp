@@ -261,6 +261,7 @@ void PlayState::Update(float deltaTime)
 	if (IsKeyPressed(KEY_SPACE) && m_player->GetAttackCharger() == m_maxAttackCharge)
 	{
 		m_player->ResetAttackCharger();
+		m_playerAttack = true;
 
 		// Center of the player texture
 		float playerXPos = m_player->GetPosition().x + m_player->GetWidth() / 2.0f;
@@ -351,17 +352,20 @@ void PlayState::Draw()
 
 	DrawTexture(m_map, 0, 0, WHITE);
 
-	if (m_enemy->GetAttackCharger() == m_maxAttackCharge &&
-		CheckCollisionCircleRec({ m_enemy->GetPosition().x + (float)m_enemy->GetWidth() / 2.0f, m_enemy->GetPosition().y + (float)m_enemy->GetHeight() / 2.0f },
-			m_enemy->GetAttackRadius(), { m_player->GetPosition().x, m_player->GetPosition().y, (float)m_player->GetWidth(), (float)m_player->GetHeight() }) &&
-		m_enemy->GetBehaviour() == m_attackBehaviour)
+	if (m_enemy->GetAttackCharger() < 60.0f)
 	{
-		DrawCircle(m_enemy->GetPosition().x + m_enemy->GetWidth() / 2, m_enemy->GetPosition().y + m_enemy->GetHeight() / 2, m_enemy->GetAttackRadius(), PURPLE);
+		for (int i = 0; i < 60; i++)
+		{
+			DrawCircle(m_enemy->GetPosition().x + m_enemy->GetWidth() / 2, m_enemy->GetPosition().y + m_enemy->GetHeight() / 2, m_enemy->GetAttackRadius(), PURPLE);
+		}
 	}
 
-	if (IsKeyPressed(KEY_SPACE) && m_player->GetAttackCharger() >= NULL && m_player->GetAttackCharger() < m_maxAttackCharge)
+	if (m_player->GetAttackCharger() < 60.0f)
 	{
-		DrawCircle(m_player->GetPosition().x + m_player->GetWidth() / 2, m_player->GetPosition().y + m_player->GetHeight() / 2, m_player->GetAttackRadius(), BLUE);
+		for (int i = 0; i < 60; i++)
+		{
+			DrawCircle(m_player->GetPosition().x + m_player->GetWidth() / 2, m_player->GetPosition().y + m_player->GetHeight() / 2, m_player->GetAttackRadius(), BLUE);
+		}
 	}
 
 	for (int i = 0; i < m_chaosEmeralds.size(); i++)
@@ -392,9 +396,12 @@ void PlayState::Draw()
 
 	char playerScore[5];
 	char enemyScore[5];
+	char playerAttack[10];
+	_itoa(m_player->GetAttackCharger(), playerAttack, 10);
 	_itoa(m_playerScore, playerScore, 10);
 	_itoa(m_enemyScore, enemyScore, 10);
 
+	DrawText(playerAttack, 10, 70, 14, BLACK);
 	DrawText("Player's score: ", 10, 30, 14, BLACK);
 	DrawText("Enemy's score: ", 10, 50, 14, BLACK);
 	DrawText(playerScore, 120, 30, 14, BLACK);
@@ -802,7 +809,7 @@ void PlayState::BehaviourSwitching()
 			{
 				m_enemy->SetBehaviour(m_seekMasterEmerald);
 			}
-			else if (m_enemyScore + m_playerScore == 7 && distanceToPlayer < 80.0f && m_enemy->GetAttackCharger() == 600.0f)
+			else if (m_enemyScore + m_playerScore == 7 && distanceToPlayer < 80.0f && m_enemy->GetAttackCharger() == m_maxAttackCharge)
 			{
 				m_enemy->SetBehaviour(m_attackBehaviour);
 			}

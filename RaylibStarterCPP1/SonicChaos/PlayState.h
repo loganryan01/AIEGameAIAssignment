@@ -52,10 +52,11 @@ private:
 
 	bool m_playerHit = false;
 	bool m_enemyHit = false;
+	bool m_playerAttack = false;
 
 	float m_distanceToEndOfPath = 0.0f;
-	float m_maxAttackCharge = 600.0f;
-	float m_maxStunTime = 300.0f;
+	float m_maxAttackCharge = 6000.0f;
+	float m_maxStunTime = 3000.0f;
 	float m_numberOfDoorNodes = 55.0f;
 
 	bool m_debugMode = false;
