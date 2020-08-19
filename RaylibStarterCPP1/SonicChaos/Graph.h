@@ -18,7 +18,7 @@ public:
 
 	struct Node
 	{
-		TNodeData data;
+		TNodeData data = { 0 };
 
 		// What type of node it is
 		bool doorNode = false;
@@ -32,12 +32,12 @@ public:
 		// bool chaosRoom = false;
 
 		// Scores
-		float gScore;
-		float hScore;
-		float fScore;
+		float gScore = 0.0f;
+		float hScore = 0.0f;
+		float fScore = 0.0f;
 
 		// Parent node
-		Node* parent;
+		Node* parent = nullptr;
 
 		std::vector<Edge> connections;
 	};

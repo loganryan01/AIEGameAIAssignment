@@ -2,7 +2,6 @@
 
 #include "Application.h"
 #include "GameStateManager.h"
-#include <iostream>
 
 MenuState::MenuState(Application* app) : m_app(app)
 {

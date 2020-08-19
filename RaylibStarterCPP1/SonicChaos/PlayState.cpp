@@ -356,7 +356,7 @@ void PlayState::Draw()
 	{
 		for (int i = 0; i < 60; i++)
 		{
-			DrawCircle(m_enemy->GetPosition().x + m_enemy->GetWidth() / 2, m_enemy->GetPosition().y + m_enemy->GetHeight() / 2, m_enemy->GetAttackRadius(), PURPLE);
+			DrawCircle((int)m_enemy->GetPosition().x + m_enemy->GetWidth() / 2, (int)m_enemy->GetPosition().y + m_enemy->GetHeight() / 2, m_enemy->GetAttackRadius(), PURPLE);
 		}
 	}
 
@@ -364,7 +364,7 @@ void PlayState::Draw()
 	{
 		for (int i = 0; i < 60; i++)
 		{
-			DrawCircle(m_player->GetPosition().x + m_player->GetWidth() / 2, m_player->GetPosition().y + m_player->GetHeight() / 2, m_player->GetAttackRadius(), BLUE);
+			DrawCircle((int)m_player->GetPosition().x + m_player->GetWidth() / 2, (int)m_player->GetPosition().y + m_player->GetHeight() / 2, m_player->GetAttackRadius(), BLUE);
 		}
 	}
 
@@ -397,7 +397,7 @@ void PlayState::Draw()
 	char playerScore[5];
 	char enemyScore[5];
 	char playerAttack[10];
-	_itoa(m_player->GetAttackCharger(), playerAttack, 10);
+	_itoa((int)m_player->GetAttackCharger(), playerAttack, 10);
 	_itoa(m_playerScore, playerScore, 10);
 	_itoa(m_enemyScore, enemyScore, 10);
 
@@ -422,8 +422,8 @@ Graph2D* PlayState::LoadGraph()
 	{
 		for (int x = 0; x < m_image.width; x += tileWidth)
 		{
-			float xPos = x + 8;
-			float yPos = y + 8;
+			float xPos = (float)x + 8;
+			float yPos = (float)y + 8;
 
 			// Get pixel color from texture c.b == 144
 			auto c = pixels[y * m_image.width + x];

@@ -4,12 +4,10 @@
 #include "PlayState.h"
 #include "SplashState.h"
 #include "MenuState.h"
+#include "VictoryState.h"
+#include "DefeatState.h"
 
 #include "raylib.h"
-
-// TODO:
-// - Game States
-// - EXTRA: Health and health packs
 
 Application::Application(int windowWidth, int windowHeight) :
 	m_windowWidth(windowWidth), m_windowHeight(windowHeight)
@@ -31,8 +29,10 @@ void Application::Load()
 	m_gameStateManager->SetState("Splash", new SplashState(this));
 	m_gameStateManager->SetState("Menu", new MenuState(this));
 	m_gameStateManager->SetState("Play", new PlayState(this));
+	m_gameStateManager->SetState("Victory", new VictoryState(this));
+	m_gameStateManager->SetState("Defeat", new DefeatState(this));
 
-	m_gameStateManager->PushState("Splash");
+	m_gameStateManager->PushState("Defeat");
 }
 
 void Application::Run()

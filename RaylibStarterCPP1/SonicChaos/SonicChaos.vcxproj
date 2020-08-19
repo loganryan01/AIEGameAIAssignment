@@ -172,6 +172,7 @@
     <ClCompile Include="AttackBehaviour.cpp" />
     <ClCompile Include="Button.cpp" />
     <ClCompile Include="ChaosEmerald.cpp" />
+    <ClCompile Include="DefeatState.cpp" />
     <ClCompile Include="EnemyAgent.cpp" />
     <ClCompile Include="FleeBehaviour.cpp" />
     <ClCompile Include="GameObject.cpp" />
@@ -186,6 +187,7 @@
     <ClCompile Include="SeekChaosEmerald.cpp" />
     <ClCompile Include="SeekMasterEmerald.cpp" />
     <ClCompile Include="SplashState.cpp" />
+    <ClCompile Include="VictoryState.cpp" />
     <ClCompile Include="WanderBehaviour.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -195,6 +197,7 @@
     <ClInclude Include="Behaviour.h" />
     <ClInclude Include="Button.h" />
     <ClInclude Include="ChaosEmerald.h" />
+    <ClInclude Include="DefeatState.h" />
     <ClInclude Include="EnemyAgent.h" />
     <ClInclude Include="FleeBehaviour.h" />
     <ClInclude Include="GameObject.h" />
@@ -210,6 +213,7 @@
     <ClInclude Include="SeekChaosEmerald.h" />
     <ClInclude Include="SeekMasterEmerald.h" />
     <ClInclude Include="SplashState.h" />
+    <ClInclude Include="VictoryState.h" />
     <ClInclude Include="WanderBehaviour.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

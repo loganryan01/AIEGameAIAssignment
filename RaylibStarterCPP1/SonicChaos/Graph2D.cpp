@@ -17,34 +17,25 @@ void Graph2D::Draw()
 	{
 		if (node->doorNode == true)
 		{
-			DrawCircle(node->data.x, node->data.y, 8, GREEN);
-			DrawCircleLines(node->data.x, node->data.y, 8, DARKGREEN);
+			DrawCircle((int)node->data.x, (int)node->data.y, 8, GREEN);
+			DrawCircleLines((int)node->data.x, (int)node->data.y, 8, DARKGREEN);
 		}
 		else if (node->chaosNode == true)
 		{
-			DrawCircle(node->data.x, node->data.y, 8, BLUE);
-			DrawCircleLines(node->data.x, node->data.y, 8, DARKBLUE);
+			DrawCircle((int)node->data.x, (int)node->data.y, 8, BLUE);
+			DrawCircleLines((int)node->data.x, (int)node->data.y, 8, DARKBLUE);
 		}
 		else if (node->masterNode == true)
 		{
-			DrawCircle(node->data.x, node->data.y, 8, BROWN);
-			DrawCircleLines(node->data.x, node->data.y, 8, DARKBROWN);
+			DrawCircle((int)node->data.x, (int)node->data.y, 8, BROWN);
+			DrawCircleLines((int)node->data.x, (int)node->data.y, 8, DARKBROWN);
 		}
 		else
 		{
-			DrawCircle(node->data.x, node->data.y, 8, GRAY);
-			DrawCircleLines(node->data.x, node->data.y, 8, LIGHTGRAY);
+			DrawCircle((int)node->data.x, (int)node->data.y, 8, GRAY);
+			DrawCircleLines((int)node->data.x, (int)node->data.y, 8, LIGHTGRAY);
 		}
 	}
-
-	// Draw all connections
-	/*for (auto node : GetNodes())
-	{
-		for (auto connection : node->connections)
-		{
-			DrawLine(node->data.x, node->data.y, connection.to->data.x, connection.to->data.y, RED);
-		}
-	}*/
 }
 
 void Graph2D::DrawPath(std::list<Node*>& path)
@@ -53,7 +44,7 @@ void Graph2D::DrawPath(std::list<Node*>& path)
 	{
 		for (auto connection : node->connections)
 		{
-			DrawLine(node->data.x, node->data.y, connection.to->data.x, connection.to->data.y, RED);
+			DrawLine((int)node->data.x, (int)node->data.y, (int)connection.to->data.x, (int)connection.to->data.y, RED);
 		}
 	}
 }
