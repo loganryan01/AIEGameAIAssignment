@@ -1,22 +1,44 @@
+/*---------------------------------
+	File Name: PlayerAgent.cpp
+	Purpose: Create a player agent.
+	Author: Logan Ryan
+	Modified: 19 August 2020
+-----------------------------------
+	Copyright 2020 Logan Ryan.
+---------------------------------*/
+
 #include "PlayerAgent.h"
 
+//------------
+// Constructor
+//------------
 PlayerAgent::PlayerAgent()
 {
+	// Load the Sonic texture
 	m_texture = LoadTexture("./resources/Sonic.png");
 
+	// Create an AABB for the player
 	m_topAABB = { m_position.x + 1.0f, m_position.y, (float)m_texture.width - 1.0f, 1.0f };
 	m_leftAABB = { m_position.x, m_position.y + 1.0f, 1.0f, (float)m_texture.height - 2.0f };
 	m_rightAABB = { m_position.x + (float)m_texture.width, m_position.y + 1.0f, 1.0f, (float)m_texture.height - 2.0f};
 	m_bottomAABB = { m_position.x + 1.0f, m_position.y + ((float)m_texture.height - 1.0f), (float)m_texture.width - 1.0f, 1.0f};
 }
 
+//-----------
+// Destructor
+//-----------
 PlayerAgent::~PlayerAgent()
 {
 	UnloadTexture(m_texture);
 }
 
+//--------------------------------------------------------------
+// Update the player agent
+//	deltaTime (float): How many frames are happening per second?
+//--------------------------------------------------------------
 void PlayerAgent::Update(float deltaTime)
 {
+	// Update the AABB for the player
 	m_topAABB = { m_position.x + 1.0f, m_position.y, (float)m_texture.width - 1.0f, 1.0f };
 	m_leftAABB = { m_position.x, m_position.y + 1.0f, 1.0f, (float)m_texture.height - 2.0f };
 	m_rightAABB = { m_position.x + (float)m_texture.width, m_position.y + 1.0f, 1.0f, (float)m_texture.height - 2.0f };
@@ -25,42 +47,10 @@ void PlayerAgent::Update(float deltaTime)
 	Agent::Update(deltaTime);
 }
 
+//----------------------
+// Draw the player agent
+//----------------------
 void PlayerAgent::Draw()
 {
 	DrawTexture(m_texture, m_position.x, m_position.y, WHITE);
-
-	DrawRectangleLines(m_topAABB.x, m_topAABB.y, m_topAABB.width, m_topAABB.height, BLACK);
-	DrawRectangleLines(m_leftAABB.x, m_leftAABB.y, m_leftAABB.width, m_leftAABB.height, BLACK);
-	DrawRectangleLines(m_rightAABB.x, m_rightAABB.y, m_rightAABB.width, m_rightAABB.height, BLACK);
-	DrawRectangleLines(m_bottomAABB.x, m_bottomAABB.y, m_bottomAABB.width, m_bottomAABB.height, BLACK);
-}
-
-int PlayerAgent::GetWidth()
-{
-	return m_texture.width;
-}
-
-int PlayerAgent::GetHeight()
-{
-	return m_texture.height;
-}
-
-Rectangle PlayerAgent::GetTopAABB()
-{
-	return m_topAABB;
-}
-
-Rectangle PlayerAgent::GetLeftAABB()
-{
-	return m_leftAABB;
-}
-
-Rectangle PlayerAgent::GetRightAABB()
-{
-	return m_rightAABB;
-}
-
-Rectangle PlayerAgent::GetBottomAABB()
-{
-	return m_bottomAABB;
 }

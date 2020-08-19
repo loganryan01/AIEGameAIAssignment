@@ -175,7 +175,6 @@
     <ClCompile Include="DefeatState.cpp" />
     <ClCompile Include="EnemyAgent.cpp" />
     <ClCompile Include="FleeBehaviour.cpp" />
-    <ClCompile Include="GameObject.cpp" />
     <ClCompile Include="GameStateManager.cpp" />
     <ClCompile Include="Graph2D.cpp" />
     <ClCompile Include="KeyboardBehaviour.cpp" />

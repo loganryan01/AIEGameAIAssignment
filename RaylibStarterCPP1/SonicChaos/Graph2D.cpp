@@ -1,15 +1,32 @@
+/*-----------------------------
+	File Name: Graph2D.cpp
+	Purpose: Create a 2D Graph.
+	Author: Logan Ryan
+	Modified: 19 August 2020
+-------------------------------
+	Copyright 2020 Logan Ryan.
+-----------------------------*/
 #include "Graph2D.h"
 
+//------------
+// Constructor
+//------------
 Graph2D::Graph2D()
 {
 
 }
 
+//-----------
+// Destructor
+//-----------
 Graph2D::~Graph2D()
 {
 
 }
 
+//------------------
+// Draw the 2D graph
+//------------------
 void Graph2D::Draw()
 {
 	// Draw all nodes
@@ -38,6 +55,9 @@ void Graph2D::Draw()
 	}
 }
 
+//--------------
+// Draw the path
+//--------------
 void Graph2D::DrawPath(std::list<Node*>& path)
 {
 	for (auto node : path)
@@ -49,6 +69,11 @@ void Graph2D::DrawPath(std::list<Node*>& path)
 	}
 }
 
+//---------------------------------------------------
+// Set node to be a door node
+//	xPos (float): What is the x position of the node?
+//	yPos (float): What is the y position of the node?
+//---------------------------------------------------
 void Graph2D::SetDoorNode(float xPos, float yPos)
 {
 	Node* node = new Node();
@@ -58,6 +83,11 @@ void Graph2D::SetDoorNode(float xPos, float yPos)
 	m_nodes.push_back(node);
 }
 
+//---------------------------------------------------
+// Set node to be a Chaos Emerald node
+//	xPos (float): What is the x position of the node?
+//	yPos (float): What is the y position of the node?
+//---------------------------------------------------
 void Graph2D::SetChaosNode(float xPos, float yPos)
 {
 	Node* node = new Node();
@@ -67,6 +97,11 @@ void Graph2D::SetChaosNode(float xPos, float yPos)
 	m_nodes.push_back(node);
 }
 
+//---------------------------------------------------
+// Set node to be a Master Emerald node
+//	xPos (float): What is the x position of the node?
+//	yPos (float): What is the y position of the node?
+//---------------------------------------------------
 void Graph2D::SetMasterNode(float xPos, float yPos)
 {
 	Node* node = new Node();
@@ -76,18 +111,11 @@ void Graph2D::SetMasterNode(float xPos, float yPos)
 	m_nodes.push_back(node);
 }
 
-void Graph2D::GetNearbyNodes(Vector2 position, float radius, std::vector<Graph2D::Node*>& out_nodes)
-{
-	for (auto node : m_nodes)
-	{
-		float dist = Vector2Distance(position, node->data);
-		if (dist < radius)
-		{
-			out_nodes.push_back(node);
-		}
-	}
-}
-
+//---------------------------------------------------------
+// Set the edges of the node
+//	start (Graph2D::Node*): What is the starting node?
+//	radius (float): What is the radius of the nearby nodes?
+//---------------------------------------------------------
 void Graph2D::SetEdges(Graph2D::Node* start, float radius)
 {
 	float numberOfNodes = 1.0f;

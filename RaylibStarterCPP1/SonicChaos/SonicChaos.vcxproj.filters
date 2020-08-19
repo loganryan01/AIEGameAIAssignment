@@ -42,9 +42,6 @@
     <ClCompile Include="WanderBehaviour.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="GameObject.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="ChaosEmerald.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>

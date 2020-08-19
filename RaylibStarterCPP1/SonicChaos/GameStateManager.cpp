@@ -1,11 +1,26 @@
+/*---------------------------------
+	File Name: GameStateManager.cpp
+	Purpose: Mange the game states.
+	Author: Logan Ryan
+	Modified: 19 August 2020
+-----------------------------------
+	Copyright 2020 Logan Ryan.
+---------------------------------*/
+
 #include "GameStateManager.h"
 #include "IGameState.h"
 
+//------------
+// Constructor
+//------------
 GameStateManager::GameStateManager()
 {
 
 }
 
+//-----------
+// Destructor
+//-----------
 GameStateManager::~GameStateManager()
 {
 	for (auto iter = m_states.begin(); iter != m_states.end(); iter++)
@@ -20,6 +35,10 @@ GameStateManager::~GameStateManager()
 	m_states.clear();
 }
 
+//--------------------------------------------------------------
+// Update the game state manager
+//	deltaTime (float): How many frames are happening per second?
+//--------------------------------------------------------------
 void GameStateManager::Update(float deltaTime)
 {
 	// invoke all recorded commands
@@ -35,6 +54,9 @@ void GameStateManager::Update(float deltaTime)
 	}
 }
 
+//---------------------
+// Draw the game states
+//---------------------
 void GameStateManager::Draw()
 {
 	for (auto state : m_stack)
@@ -43,6 +65,11 @@ void GameStateManager::Draw()
 	}
 }
 
+//----------------------------------------------------
+// Create a state for the Game State Manager stack
+//	name (const char*): What is the name of the state?
+//	state (IGameState*): What state is it?
+//----------------------------------------------------
 void GameStateManager::SetState(const char* name, IGameState* state)
 {
 	m_commands.push_back([=]()
@@ -62,22 +89,25 @@ void GameStateManager::SetState(const char* name, IGameState* state)
 		});
 }
 
+//----------------------------------------------------
+// Add a state to the Game State Manager stack
+//	name (const char*): What is the name of the state?
+//----------------------------------------------------
 void GameStateManager::PushState(const char* name)
 {
 	m_commands.push_back([=]()
 		{
 			m_stack.push_back(m_states[name]);
 		});
-
-
 }
 
+//-------------------------------------------------
+// Remove a state from the Game State Manager stack
+//-------------------------------------------------
 void GameStateManager::PopState()
 {
 	m_commands.push_back([=]()
 		{
 			m_stack.pop_back();
 		});
-
-
 }

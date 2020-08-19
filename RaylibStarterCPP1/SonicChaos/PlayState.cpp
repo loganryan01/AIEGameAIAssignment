@@ -1,8 +1,21 @@
+/*--------------------------------------------
+	File Name: PlayState.cpp
+	Purpose: Launch the main part of the game.
+	Author: Logan Ryan
+	Modified: 19 August 2020
+----------------------------------------------
+	Copyright 2020 Logan Ryan.
+--------------------------------------------*/
+
 #include "PlayState.h"
 
 #include "Application.h"
 #include "GameStateManager.h"
 
+//-----------------------------------------------------
+// Constructor
+//	app (Application*): Which application are we using?
+//-----------------------------------------------------
 PlayState::PlayState(Application* app) : m_app(app)
 {
 	m_map = { 0 };
@@ -10,18 +23,24 @@ PlayState::PlayState(Application* app) : m_app(app)
 	m_camera = { 0 };
 }
 
+//-----------
+// Destructor
+//-----------
 PlayState::~PlayState()
 {
 
 }
 
+//--------------------------------------
+// Load the assets needed for this state
+//--------------------------------------
 void PlayState::Load()
 {
-	// Textures
+	// Load the map
 	m_image = LoadImage("./resources/tilemap.png");
 	m_map = LoadTextureFromImage(m_image);
 
-	// Chaos Emeralds
+	// Load the Chaos Emeralds
 	for (int i = 0; i < 7; i++)
 	{
 		Texture2D texture;
@@ -62,22 +81,22 @@ void PlayState::Load()
 		m_chaosEmeralds.push_back(chaosEmerald);
 	}
 
-	// Master Emerald
+	// Load the Master Emerald
 	m_masterEmerald = new MasterEmerald();
 	m_masterEmerald->SetTexture(LoadTexture("./resources/Master Emerald.png"));
 	m_masterEmerald->SetPosition({ 384 , 16 });
 
-	// Graph
+	// Load the Graph
 	m_graph = LoadGraph();
 
-	// Agents
+	// Load the Agents
 	m_player = new PlayerAgent();
 	m_player->SetPosition({ 424, 760 });
 
 	m_enemy = new EnemyAgent();
 	m_enemy->SetPosition({ 392, 760 });
 
-	// Behaviours
+	// Load the Behaviours
 	m_keyboardBehaviour = new KeyboardBehaviour();
 	m_seekChaosEmerald = new SeekChaosEmerald();
 	m_seekMasterEmerald = new SeekMasterEmerald();
@@ -85,10 +104,11 @@ void PlayState::Load()
 	m_attackBehaviour = new AttackBehaviour();
 	m_fleeBehaviour = new FleeBehaviour();
 
+	// Set the behaviours for the agents
 	m_player->SetBehaviour(m_keyboardBehaviour);
 	m_enemy->SetBehaviour(m_wanderBehaviour);
 
-	// Camera
+	// Set up the Camera
 	m_camera.target = { m_player->GetPosition().x + m_player->GetWidth() / 2, m_player->GetPosition().y + m_player->GetHeight() / 2 };
 	m_camera.offset = { (float)GetScreenWidth() / 2, (float)GetScreenHeight() / 2 };
 	m_camera.zoom = 5.0f;
@@ -97,6 +117,9 @@ void PlayState::Load()
 	m_myPath = PathToDoorNode();
 }
 
+//-----------------------------------------------
+// Unload the assets that was used for this state
+//-----------------------------------------------
 void PlayState::Unload()
 {
 	// Unload behaviours
@@ -125,33 +148,47 @@ void PlayState::Unload()
 	UnloadTexture(m_map);
 }
 
+//--------------------------------------------------------------
+// Update the state
+//	deltaTime (float): How many frames are happening per second?
+//--------------------------------------------------------------
 void PlayState::Update(float deltaTime)
 {
 	// Switch Behaviours if needed
 	BehaviourSwitching();
 
 	//----- Pathfinding -----
-	// Check if we have a path or at the end of the path
+	// If we are at the end of the path or we don't have a path at all
 	if (m_myPath.empty() || m_distanceToEndOfPath < 12.0f)
 	{
+		// Empty the path
 		m_myPath.clear();
 
+		// If the enemy is wandering
 		if (m_enemy->GetBehaviour() == m_wanderBehaviour)
 		{
+			// Calculate a path to a door node
 			m_myPath = PathToDoorNode();
 		}
+		// If the enemy is seeking a chaos emerald
 		else if (m_enemy->GetBehaviour() == m_seekChaosEmerald)
 		{
+			// Calculate a path to the chaos emerald node
 			m_myPath = PathToChaosNode();
 		}
+		// If the enemy is seeking the master emerald
 		else if (m_enemy->GetBehaviour() == m_seekMasterEmerald)
 		{
+			// Calculate a path to the master emerald node
 			m_myPath = PathToMasterNode();
 		}
+		// If the enemy is attacking the player
 		else if (m_enemy->GetBehaviour() == m_attackBehaviour)
 		{
+			// Calculate a path to the player
 			m_myPath = PathToAttackPlayer();
 
+			// If the player is not on the path
 			if (m_myPath.empty())
 			{
 				// Center of the player texture
@@ -162,21 +199,26 @@ void PlayState::Update(float deltaTime)
 				float enemyXPos = m_enemy->GetPosition().x + m_enemy->GetWidth() / 2.0f;
 				float enemyYPos = m_enemy->GetPosition().y + m_enemy->GetHeight() / 2.0f;
 
+				// Distance from the enemy
 				float distanceFromPlayer = Vector2Distance({ playerXPos, playerYPos }, { enemyXPos, enemyYPos });
 
+				// If the enemy can see the player, got to him/her
 				if (distanceFromPlayer < 80.0f)
 				{
 					m_attackBehaviour->SetTarget({ playerXPos, playerYPos });
 				}
 			}
 		}
+		// If the enemy is fleeing from the player
 		else if (m_enemy->GetBehaviour() == m_fleeBehaviour)
 		{
+			// Calculate a path to avoid the player
 			m_myPath = PathToAvoidPlayer();
 		}
 	}
 
 	//----- Collision -----
+	// Loop through all the barricades and check if the player or the enemy is touching either one of them
 	for (auto barricade : m_graph->GetBarricades())
 	{
 		if (CheckCollisionCircleRec(barricade, 8.0f, m_player->GetTopAABB()) && m_player->GetVelocity().y < 0)
@@ -221,7 +263,7 @@ void PlayState::Update(float deltaTime)
 	}
 
 	//----- Attack -----
-	// Charge the attack bar if it is not fully charged
+	// Charge the attack bar of the player and the enemy if it is not fully charged
 	if (m_player->GetAttackCharger() < m_maxAttackCharge)
 	{
 		m_player->IncrementAttackCharger();
@@ -232,35 +274,7 @@ void PlayState::Update(float deltaTime)
 		m_enemy->IncrementAttackCharger();
 	}
 
-	// Remove a chaos emerald if there is one and the player is close to it.
-	for (int i = 0; i < m_chaosEmeralds.size(); i++)
-	{
-		float distanceToChaosEmerald = Vector2Distance(m_player->GetPosition(), m_chaosEmeralds[i]->GetPosition());
-
-		if (distanceToChaosEmerald < 44.0f)
-		{
-			for (auto node : m_graph->GetNodes())
-			{
-				if (node->chaosNode == true)
-				{
-					float distanceToChaosNode = Vector2Distance(m_player->GetPosition(), node->data);
-
-					if (distanceToChaosNode < 66.0f)
-					{
-						node->chaosNode = false;
-					}
-				}
-			}
-
-			m_chaosEmeralds.erase(m_chaosEmeralds.begin() + i);
-			m_playerScore++;
-			break;
-		}
-	}
-
-	m_player->Update(deltaTime);
-	m_enemy->Update(deltaTime);
-
+	// If the player has decided to attack and the attack charger is full
 	if (IsKeyPressed(KEY_SPACE) && m_player->GetAttackCharger() == m_maxAttackCharge)
 	{
 		m_player->ResetAttackCharger();
@@ -274,12 +288,14 @@ void PlayState::Update(float deltaTime)
 		float enemyXPos = m_enemy->GetPosition().x + m_enemy->GetWidth() / 2.0f;
 		float enemyYPos = m_enemy->GetPosition().y + m_enemy->GetHeight() / 2.0f;
 
+		// If the enemy is within range of the player
 		float distanceFromEnemy = Vector2Distance({ playerXPos, playerYPos }, { enemyXPos, enemyYPos });
 
 		if (distanceFromEnemy < m_player->GetAttackRadius())
 		{
 			m_enemyHit = true;
 
+			// Take away a chaos emerald if they have one
 			if (m_enemyScore > 0)
 			{
 				m_playerScore++;
@@ -288,18 +304,25 @@ void PlayState::Update(float deltaTime)
 		}
 	}
 
+	//----- Stun Behaviour -----
+	// If the player has been hit
 	if (m_playerHit)
 	{
+		// Increase the player's stun time by 1
 		m_playerStunTime++;
+		// Set the velocity to 0
 		m_player->SetVelocity({ 0 ,0 });
 
+		// Once the time is up
 		if (m_playerStunTime == m_maxStunTime)
 		{
+			// Reset
 			m_playerStunTime = 0;
 			m_playerHit = false;
 		}
 	}
 
+	// Similar to the code above
 	if (m_enemyHit)
 	{
 		m_enemyStunTime++;
@@ -312,10 +335,45 @@ void PlayState::Update(float deltaTime)
 		}
 	}
 
+	//----- Increasing player score -----
+	// Loop through all the chaos emeralds
+	for (int i = 0; i < m_chaosEmeralds.size(); i++)
+	{
+		// If the player is close to a chaos emerald
+		float distanceToChaosEmerald = Vector2Distance(m_player->GetPosition(), m_chaosEmeralds[i]->GetPosition());
+
+		if (distanceToChaosEmerald < 44.0f)
+		{
+			// Get the node that is close to the chaos emerald
+			for (auto node : m_graph->GetNodes())
+			{
+				if (node->chaosNode == true)
+				{
+					float distanceToChaosNode = Vector2Distance(m_player->GetPosition(), node->data);
+
+					if (distanceToChaosNode < 66.0f)
+					{
+						// Remove it
+						node->chaosNode = false;
+					}
+				}
+			}
+
+			// Remove the chaos emerald and increase the player's score by 1
+			m_chaosEmeralds.erase(m_chaosEmeralds.begin() + i);
+			m_playerScore++;
+			break;
+		}
+	}
+
+	m_player->Update(deltaTime);
+	m_enemy->Update(deltaTime);
+
 	//----- State Changing -----
 	float enemyDistanceToMasterEmerald = Vector2Distance(m_enemy->GetPosition(), { m_masterEmerald->GetPosition().x + m_masterEmerald->GetTexture().width / 2.0f, m_masterEmerald->GetPosition().y + m_masterEmerald->GetTexture().height / 2.0f });
 	float playerDistanceToMasterEmerald = Vector2Distance(m_player->GetPosition(), { m_masterEmerald->GetPosition().x + m_masterEmerald->GetTexture().width / 2.0f, m_masterEmerald->GetPosition().y + m_masterEmerald->GetTexture().height / 2.0f });
 
+	// Switch to the victory state if the player is close the Master Emerald and they have all the Chaos Emeralds
 	if (playerDistanceToMasterEmerald < 48.0f && m_playerScore == 7)
 	{
 		m_app->GetGameStateManager()->SetState("Play", nullptr);
@@ -323,7 +381,7 @@ void PlayState::Update(float deltaTime)
 		m_app->GetGameStateManager()->PushState("Victory");
 	}
 
-
+	// Switch to the defeat state if the enemy is close the Master Emerald and they have all the Chaos Emeralds
 	if (enemyDistanceToMasterEmerald < 48.0f && m_enemyScore == 7)
 	{
 		m_app->GetGameStateManager()->SetState("Play", nullptr);
@@ -331,17 +389,20 @@ void PlayState::Update(float deltaTime)
 		m_app->GetGameStateManager()->PushState("Defeat");
 	}
 
-	// Reset the door nodes 
+	//----- Door node -----
 	float beenHereDoorNodes = 0.0f;
 
+	// Loop through all the nodes
 	for (auto node : m_graph->GetNodes())
 	{
 		if (node->doorNode == true && node->beenHere == true)
 		{
+			// Increase by 1 if it's a door node that the enemy has been to it
 			beenHereDoorNodes++;
 		}
 	}
 
+	// If the enemy has been to all the door nodes, reset them
 	if (beenHereDoorNodes == m_numberOfDoorNodes)
 	{
 		for (auto node : m_graph->GetNodes())
@@ -353,6 +414,8 @@ void PlayState::Update(float deltaTime)
 		}
 	}
 
+	//----- Debug mode -----
+	// Press tab to activate debug mode
 	if (IsKeyPressed(KEY_TAB) && m_debugMode == false)
 	{
 		m_debugMode = true;
@@ -362,11 +425,17 @@ void PlayState::Update(float deltaTime)
 		m_debugMode = false;
 	}
 
+	//----- Camera -----
+	// Update the camera position
 	m_camera.target = { m_player->GetPosition().x + m_player->GetWidth() / 2, m_player->GetPosition().y + m_player->GetHeight() / 2 };
 }
 
+//---------------
+// Draw the state
+//---------------
 void PlayState::Draw()
 {
+	// Use the camera if we are not in debug mode
 	if (m_debugMode == false)
 	{
 		BeginMode2D(m_camera);
@@ -374,6 +443,7 @@ void PlayState::Draw()
 
 	DrawTexture(m_map, 0, 0, WHITE);
 
+	// Draw a circle around the agents when they attack
 	if (m_enemy->GetAttackCharger() < 60.0f)
 	{
 		for (int i = 0; i < 60; i++)
@@ -390,6 +460,7 @@ void PlayState::Draw()
 		}
 	}
 
+	// Draw Game Objects
 	for (int i = 0; i < m_chaosEmeralds.size(); i++)
 	{
 		m_chaosEmeralds[i]->Draw();
@@ -397,20 +468,24 @@ void PlayState::Draw()
 
 	m_masterEmerald->Draw();
 
+	// Draw Agents
 	m_player->Draw();
 	m_enemy->Draw();
 
+	// Draw the graph when we are in debug mode and the AI path
 	if (m_debugMode == true)
 	{
 		m_graph->Draw();
 		m_graph->DrawPath(m_myPath);
 	}
 
+	// If we are not in debug mode, then leave 2D mode
 	if (m_debugMode == false)
 	{
 		EndMode2D();
 	}
 
+	// Tell the player their attack is ready, once the attack is charged
 	if (m_player->GetAttackCharger() == m_maxAttackCharge)
 	{
 		DrawText("Attack is Ready", 10, 10, 14, BLACK);
@@ -418,28 +493,34 @@ void PlayState::Draw()
 
 	char playerScore[5];
 	char enemyScore[5];
-	char playerAttack[10];
-	_itoa((int)m_player->GetAttackCharger(), playerAttack, 10);
 	_itoa(m_playerScore, playerScore, 10);
 	_itoa(m_enemyScore, enemyScore, 10);
 
-	DrawText(playerAttack, 10, 70, 14, BLACK);
+	// Draw scores
 	DrawText("Player's score: ", 10, 30, 14, BLACK);
 	DrawText("Enemy's score: ", 10, 50, 14, BLACK);
 	DrawText(playerScore, 120, 30, 14, BLACK);
 	DrawText(enemyScore, 120, 50, 14, BLACK);
 }
 
+//---------------
+// Load the graph
+//---------------
 Graph2D* PlayState::LoadGraph()
 {
+	// Get the graph
 	Image image = LoadImage("./resources/graph.png");
+
+	// Get the pixels from the image
 	Color* pixels = GetImageData(image);
+
 	Graph2D* graph = new Graph2D;
 	std::vector<Graph2D::Node*> nodes;
 
 	int tileWidth = 16;
 	int tileHeight = 16;
 
+	// Loop through the pixels
 	for (int y = 0; y < m_image.height; y += tileHeight)
 	{
 		for (int x = 0; x < m_image.width; x += tileWidth)
@@ -447,8 +528,10 @@ Graph2D* PlayState::LoadGraph()
 			float xPos = (float)x + 8;
 			float yPos = (float)y + 8;
 
-			// Get pixel color from texture c.b == 144
+			// Get pixel color from texture
 			auto c = pixels[y * m_image.width + x];
+
+			// Create the nodes based on their colour
 			if (c.a > 0 && c.b == 144)
 			{
 				graph->SetDoorNode(xPos, yPos);
@@ -474,14 +557,19 @@ Graph2D* PlayState::LoadGraph()
 		}
 	}
 
+	// Create edges
 	for (auto node : graph->GetNodes())
 	{
 		graph->SetEdges(node, 32.0f);
 	}
 
+	// Return graph
 	return graph;
 }
 
+//--------------------------
+// Get a path to a door node
+//--------------------------
 std::list<Graph2D::Node*> PlayState::PathToDoorNode()
 {
 	Graph2D::Node* startingNode = nullptr;
@@ -500,6 +588,7 @@ std::list<Graph2D::Node*> PlayState::PathToDoorNode()
 		}
 	}
 
+	// If a starting node cannot be found then return an empty path
 	try {
 		if (startingNode == nullptr)
 		{
@@ -510,7 +599,7 @@ std::list<Graph2D::Node*> PlayState::PathToDoorNode()
 		return doorPath;
 	}
 
-	// End node should be a door node that we haven't visited yet
+	// Get the a door node that the enemy has not been to
 	endNode = m_graph->DepthFirstSearch(startingNode, [&](Graph2D::Node* chosenNode) {
 		float distance = Vector2Distance(startingNode->data, chosenNode->data);
 
@@ -522,6 +611,7 @@ std::list<Graph2D::Node*> PlayState::PathToDoorNode()
 		return false;
 		});
 
+	// If an end node cannot be found then return an empty path and set behaviour to wander
 	try {
 		if (endNode == nullptr)
 		{
@@ -533,21 +623,31 @@ std::list<Graph2D::Node*> PlayState::PathToDoorNode()
 		return doorPath;
 	}
 
+	// Calculate a path
 	doorPath = m_graph->dijkstrasSearch(startingNode, endNode);
+
+	// Set the end node's been here to true
 	doorPath.back()->beenHere = true;
 
+	// Set the path for the behaviour
 	for (auto node : doorPath)
 	{
 		m_wanderBehaviour->SetPathNode(node->data);
 	}
 
+	// Set the target to be the front of the path
 	m_wanderBehaviour->SetTarget(doorPath.front()->data);
 
 	return doorPath;
 }
 
+//-----------------------------------
+// Get a path to a Chaos Emerald node
+//-----------------------------------
 std::list<Graph2D::Node*> PlayState::PathToChaosNode()
 {
+	// Similar code to PathToDoorNode but the difference in this one is it looks for a Chaos Emerald node
+	
 	Graph2D::Node* startingNode = nullptr;
 	Graph2D::Node* endNode = nullptr;
 	std::list<Graph2D::Node*> chaosPath;
@@ -599,6 +699,8 @@ std::list<Graph2D::Node*> PlayState::PathToChaosNode()
 	}
 
 	chaosPath = m_graph->AStarSearch(startingNode, endNode);
+
+	// Remove the chaos node from the graph
 	chaosPath.back()->chaosNode = false;
 
 	for (auto node : chaosPath)
@@ -611,8 +713,13 @@ std::list<Graph2D::Node*> PlayState::PathToChaosNode()
 	return chaosPath;
 }
 
+//--------------------------------------
+// Get a path to the Master Emerald node
+//--------------------------------------
 std::list<Graph2D::Node*> PlayState::PathToMasterNode()
 {
+	// Similar code to PathToDoorNode but the difference in this one is it looks for the Master Emerald node
+
 	Graph2D::Node* startingNode = nullptr;
 	Graph2D::Node* endNode = nullptr;
 	std::list<Graph2D::Node*> masterPath;
@@ -674,8 +781,13 @@ std::list<Graph2D::Node*> PlayState::PathToMasterNode()
 	return masterPath;
 }
 
+//-----------------------------------------------------------
+// Get a path to the node that player is on to attack him/her
+//-----------------------------------------------------------
 std::list<Graph2D::Node*> PlayState::PathToAttackPlayer()
 {
+	// Similar code to PathToDoorNode but the difference in this one is it looks for the node that the player is on
+	
 	Graph2D::Node* startingNode = nullptr;
 	Graph2D::Node* endNode = nullptr;
 	std::list<Graph2D::Node*> playerPath;
@@ -737,8 +849,13 @@ std::list<Graph2D::Node*> PlayState::PathToAttackPlayer()
 	return playerPath;
 }
 
+//--------------------------------------------------
+// Get a path to a node that is away from the player
+//--------------------------------------------------
 std::list<Graph2D::Node*> PlayState::PathToAvoidPlayer()
 {
+	// Similar code to PathToDoorNode but the difference in this one is it looks for the node that is far away from the player
+	
 	Graph2D::Node* startingNode = nullptr;
 	Graph2D::Node* endNode = nullptr;
 	std::list<Graph2D::Node*> fleePath;
@@ -800,6 +917,9 @@ std::list<Graph2D::Node*> PlayState::PathToAvoidPlayer()
 	return fleePath;
 }
 
+//--------------------------------------
+// Switch Behaviours for the enemy agent
+//--------------------------------------
 void PlayState::BehaviourSwitching()
 {
 	// Check if we are at the end of the path
@@ -808,16 +928,18 @@ void PlayState::BehaviourSwitching()
 		m_distanceToEndOfPath = Vector2Distance(m_enemy->GetPosition(), m_myPath.back()->data);
 	}
 
-	//----- Behaviour switching -----
+	// If we are at the end of the path.
 	if (m_distanceToEndOfPath < 12.0f)
 	{
+		// If the enemy's behaviour is wander
 		if (m_enemy->GetBehaviour() == m_wanderBehaviour)
 		{
-			// Switch from wander to seek chaos emerald if the distance from the player to the chaos node is less than 48.0f
+			// Loop through all the nodes
 			for (auto node : m_graph->GetNodes())
 			{
 				float distanceToChaosNode = Vector2Distance(m_enemy->GetPosition(), node->data);
 
+				// If the enemy is close to a Chaos Emerald, switch to seek Chaos Emerald
 				if (node->chaosNode == true && node->beenHere == false && distanceToChaosNode < 78.0f)
 				{
 					m_enemy->SetBehaviour(m_seekChaosEmerald);
@@ -827,15 +949,19 @@ void PlayState::BehaviourSwitching()
 
 			float distanceToPlayer = Vector2Distance(m_enemy->GetPosition(), m_player->GetPosition());
 
+			// If the enemy has all the Chaos Emeralds, switch to seek Master Emerald
 			if (m_enemyScore == 7)
 			{
 				m_enemy->SetBehaviour(m_seekMasterEmerald);
 			}
+			// If the enemy doesn't have all the chaos emeralds, can see the player and their attack is ready
 			else if (m_enemyScore + m_playerScore == 7 && distanceToPlayer < 80.0f && m_enemy->GetAttackCharger() == m_maxAttackCharge)
 			{
+				// Switch to attack 
 				m_enemy->SetBehaviour(m_attackBehaviour);
 			}
 		}
+		// If the enemy's behaviour is seek chaos emerald
 		else if (m_enemy->GetBehaviour() == m_seekChaosEmerald)
 		{
 			// Remove chaos emerald if there is one 
@@ -857,13 +983,16 @@ void PlayState::BehaviourSwitching()
 				}
 			}
 
+			// If the enemy has all the chaos emeralds, switch to seek Master Emerald
 			if (m_enemyScore == 7)
 			{
 				m_enemy->SetBehaviour(m_seekMasterEmerald);
 			}
 		}
+		// If the enemy's behaviour is seek Master Emerald
 		else if (m_enemy->GetBehaviour() == m_seekMasterEmerald)
 		{
+			// And doesn't have the 7 Chaos Emeralds, switch to seek Master Emerald
 			if (m_enemyScore < 7)
 			{
 				m_enemy->SetBehaviour(m_wanderBehaviour);
@@ -871,6 +1000,7 @@ void PlayState::BehaviourSwitching()
 		}
 	}
 
+	// If the enemy's behaviour is attack
 	if (m_enemy->GetBehaviour() == m_attackBehaviour)
 	{
 		// Center of the player texture
@@ -883,11 +1013,14 @@ void PlayState::BehaviourSwitching()
 
 		float distanceToPlayer = Vector2Distance({ playerXPos, playerYPos }, { enemyXPos, enemyYPos });
 
+		// If the enemy has hit the player
 		if (distanceToPlayer < m_enemy->GetAttackRadius())
 		{
+			// Reset the attack charger
 			m_enemy->ResetAttackCharger();
 			m_playerHit = true;
 
+			// Steal an emerald if the player has one
 			if (m_playerScore > 0)
 			{
 				m_playerScore--;
@@ -895,7 +1028,7 @@ void PlayState::BehaviourSwitching()
 			}
 		}
 
-		// Switch to flee once we have attacked
+		// Switch to flee once we have attacked, or wander if we are already far away from the player
 		if (m_enemy->GetAttackCharger() < m_maxAttackCharge)
 		{
 			m_enemy->SetBehaviour(m_fleeBehaviour);
@@ -907,6 +1040,7 @@ void PlayState::BehaviourSwitching()
 			m_myPath.clear();
 		}
 	}
+	// If the enemy's behaviour is flee
 	else if (m_enemy->GetBehaviour() == m_fleeBehaviour)
 	{
 		// Center of the player texture
@@ -919,6 +1053,7 @@ void PlayState::BehaviourSwitching()
 
 		float distanceFromPlayer = Vector2Distance({ playerXPos, playerYPos }, { enemyXPos, enemyYPos });
 
+		// If the enemy has escaped the player then switch to wander behaviour
 		if (distanceFromPlayer > 80.0f)
 		{
 			m_enemy->SetBehaviour(m_wanderBehaviour);
