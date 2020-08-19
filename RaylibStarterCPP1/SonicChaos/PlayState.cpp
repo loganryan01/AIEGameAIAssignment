@@ -1,5 +1,8 @@
 #include "PlayState.h"
 
+#include "Application.h"
+#include "GameStateManager.h"
+
 PlayState::PlayState(Application* app) : m_app(app)
 {
 	m_map = { 0 };
@@ -307,6 +310,25 @@ void PlayState::Update(float deltaTime)
 			m_enemyStunTime = 0;
 			m_enemyHit = false;
 		}
+	}
+
+	//----- State Changing -----
+	float enemyDistanceToMasterEmerald = Vector2Distance(m_enemy->GetPosition(), { m_masterEmerald->GetPosition().x + m_masterEmerald->GetTexture().width / 2.0f, m_masterEmerald->GetPosition().y + m_masterEmerald->GetTexture().height / 2.0f });
+	float playerDistanceToMasterEmerald = Vector2Distance(m_player->GetPosition(), { m_masterEmerald->GetPosition().x + m_masterEmerald->GetTexture().width / 2.0f, m_masterEmerald->GetPosition().y + m_masterEmerald->GetTexture().height / 2.0f });
+
+	if (playerDistanceToMasterEmerald < 48.0f && m_playerScore == 7)
+	{
+		m_app->GetGameStateManager()->SetState("Play", nullptr);
+		m_app->GetGameStateManager()->PopState();
+		m_app->GetGameStateManager()->PushState("Victory");
+	}
+
+
+	if (enemyDistanceToMasterEmerald < 48.0f && m_enemyScore == 7)
+	{
+		m_app->GetGameStateManager()->SetState("Play", nullptr);
+		m_app->GetGameStateManager()->PopState();
+		m_app->GetGameStateManager()->PushState("Defeat");
 	}
 
 	// Reset the door nodes 

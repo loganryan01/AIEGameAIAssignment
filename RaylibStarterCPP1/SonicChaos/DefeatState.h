@@ -24,7 +24,6 @@ private:
 
 	Texture2D m_superShadow;
 
-	Button* m_playButton = nullptr;
 	Button* m_exitButton = nullptr;
 };
 

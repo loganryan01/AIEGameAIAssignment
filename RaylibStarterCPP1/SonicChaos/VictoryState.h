@@ -24,7 +24,6 @@ private:
 
 	Texture2D m_superSonic;
 
-	Button* m_playButton = nullptr;
 	Button* m_exitButton = nullptr;
 };
 

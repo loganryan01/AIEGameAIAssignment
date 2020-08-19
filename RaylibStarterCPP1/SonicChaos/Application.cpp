@@ -32,7 +32,7 @@ void Application::Load()
 	m_gameStateManager->SetState("Victory", new VictoryState(this));
 	m_gameStateManager->SetState("Defeat", new DefeatState(this));
 
-	m_gameStateManager->PushState("Defeat");
+	m_gameStateManager->PushState("Play");
 }
 
 void Application::Run()
