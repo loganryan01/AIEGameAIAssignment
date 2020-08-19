@@ -623,6 +623,12 @@ std::list<Graph2D::Node*> PlayState::PathToDoorNode()
 		return doorPath;
 	}
 
+	// If the starting node is the same as the end node then return an empty path
+	if (startingNode == endNode)
+	{
+		return doorPath;
+	}
+
 	// Calculate a path
 	doorPath = m_graph->dijkstrasSearch(startingNode, endNode);
 
@@ -698,6 +704,12 @@ std::list<Graph2D::Node*> PlayState::PathToChaosNode()
 		return chaosPath;
 	}
 
+	// If the starting node is the same as the end node then return an empty path
+	if (startingNode == endNode)
+	{
+		return chaosPath;
+	}
+
 	chaosPath = m_graph->AStarSearch(startingNode, endNode);
 
 	// Remove the chaos node from the graph
@@ -765,6 +777,12 @@ std::list<Graph2D::Node*> PlayState::PathToMasterNode()
 		}
 	}
 	catch (...) {
+		return masterPath;
+	}
+
+	// If the starting node is the same as the end node then return an empty path
+	if (startingNode == endNode)
+	{
 		return masterPath;
 	}
 
@@ -837,6 +855,12 @@ std::list<Graph2D::Node*> PlayState::PathToAttackPlayer()
 		return playerPath;
 	}
 
+	// If the starting node is the same as the end node then return an empty path
+	if (startingNode == endNode)
+	{
+		return playerPath;
+	}
+
 	playerPath = m_graph->AStarSearch(startingNode, endNode);
 
 	for (auto node : playerPath)
@@ -902,6 +926,12 @@ std::list<Graph2D::Node*> PlayState::PathToAvoidPlayer()
 		}
 	}
 	catch (...) {
+		return fleePath;
+	}
+
+	// If the starting node is the same as the end node then return an empty path
+	if (startingNode == endNode)
+	{
 		return fleePath;
 	}
 
