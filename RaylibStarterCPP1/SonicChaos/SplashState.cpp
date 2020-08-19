@@ -32,9 +32,8 @@ void SplashState::Draw()
 {
 	if (m_timer < 3.0f)
 	{
-		DrawTexture(m_logo, 0, GetScreenHeight() / 2 - m_logo.height / 2, WHITE);
-
 		DrawText("Characters owned by", GetScreenWidth() * 0.30, GetScreenHeight() * 0.25, 30, DARKBLUE);
+		DrawTexture(m_logo, 0, GetScreenHeight() / 2 - m_logo.height / 2, WHITE);
 	}
 
 	if (m_timer > 3.0f)

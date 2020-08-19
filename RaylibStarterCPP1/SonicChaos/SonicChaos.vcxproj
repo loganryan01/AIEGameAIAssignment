@@ -170,6 +170,7 @@
     <ClCompile Include="Agent.cpp" />
     <ClCompile Include="Application.cpp" />
     <ClCompile Include="AttackBehaviour.cpp" />
+    <ClCompile Include="Button.cpp" />
     <ClCompile Include="ChaosEmerald.cpp" />
     <ClCompile Include="EnemyAgent.cpp" />
     <ClCompile Include="FleeBehaviour.cpp" />
@@ -179,6 +180,7 @@
     <ClCompile Include="KeyboardBehaviour.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="MasterEmerald.cpp" />
+    <ClCompile Include="MenuState.cpp" />
     <ClCompile Include="PlayerAgent.cpp" />
     <ClCompile Include="PlayState.cpp" />
     <ClCompile Include="SeekChaosEmerald.cpp" />
@@ -191,6 +193,7 @@
     <ClInclude Include="Application.h" />
     <ClInclude Include="AttackBehaviour.h" />
     <ClInclude Include="Behaviour.h" />
+    <ClInclude Include="Button.h" />
     <ClInclude Include="ChaosEmerald.h" />
     <ClInclude Include="EnemyAgent.h" />
     <ClInclude Include="FleeBehaviour.h" />
@@ -201,6 +204,7 @@
     <ClInclude Include="IGameState.h" />
     <ClInclude Include="KeyboardBehaviour.h" />
     <ClInclude Include="MasterEmerald.h" />
+    <ClInclude Include="MenuState.h" />
     <ClInclude Include="PlayerAgent.h" />
     <ClInclude Include="PlayState.h" />
     <ClInclude Include="SeekChaosEmerald.h" />
