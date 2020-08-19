@@ -80,5 +80,5 @@ void MenuState::Draw()
 	m_exitButton->Draw();
 
 	// Draw the name of the game
-	DrawText("SONIC CHAOS", GetScreenWidth() * 0.06f, GetScreenHeight() * 0.3f, 100, BLUE);
+	DrawText("SONIC CHAOS", (int)(GetScreenWidth() * 0.06f), (int)(GetScreenHeight() * 0.3f), 100, BLUE);
 }

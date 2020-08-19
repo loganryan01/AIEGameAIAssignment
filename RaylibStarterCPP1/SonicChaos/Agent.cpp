@@ -41,5 +41,5 @@ void Agent::Update(float deltaTime)
 //---------------
 void Agent::Draw()
 {
-	DrawRectangle(m_position.x, m_position.y, 16, 16, RED);
+	DrawRectangle((int)m_position.x, (int)m_position.y, 16, 16, RED);
 }

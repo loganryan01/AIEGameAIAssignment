@@ -73,7 +73,7 @@ void VictoryState::Draw()
 	// Draw Super Sonic
 	DrawTexture(m_superSonic, 0, 0, WHITE);
 
-	DrawText("CONGRATULATIONS!!!!!!", GetScreenWidth() * 0.25f, 0, 30, GOLD);
+	DrawText("CONGRATULATIONS!!!!!!", (int)(GetScreenWidth() * 0.25f), 0, 30, GOLD);
 
 	// Draw exit button
 	m_exitButton->Draw();

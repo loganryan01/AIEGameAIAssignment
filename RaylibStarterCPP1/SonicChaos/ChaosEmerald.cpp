@@ -23,5 +23,5 @@ ChaosEmerald::ChaosEmerald()
 //-----------------------
 void ChaosEmerald::Draw()
 {
-	DrawTexture(m_texture, m_position.x, m_position.y, WHITE);
+	DrawTexture(m_texture, (int)m_position.x, (int)m_position.y, WHITE);
 }

@@ -15,7 +15,7 @@
 //	shape (Rectangle): What is the position and measurements for the button?
 //--------------------------------------------------------------------------
 Button::Button(std::string text, Rectangle shape) : m_text(text), m_shape(shape), m_mousePosition(GetMousePosition()),
-m_endPositionX(shape.x + shape.width), m_endPositionY(shape.y + shape.height)
+m_endPositionX((int)shape.x + (int)shape.width), m_endPositionY((int)shape.y + (int)shape.height)
 {
 
 }
@@ -53,18 +53,18 @@ void Button::Update()
 void Button::Draw()
 {
 	// Draw the shape
-	DrawRectangleLines(m_shape.x, m_shape.y, m_shape.width, m_shape.height, BLACK);
+	DrawRectangleLines((int)m_shape.x, (int)m_shape.y, (int)m_shape.width, (int)m_shape.height, BLACK);
 
 	char* cstr = new char[m_text.length() + 1];
 	std::strcpy(cstr, m_text.c_str());
 
 	// Draw the text
-	DrawText(cstr, m_shape.x + 5.0f, m_shape.y + 1.0f, 40, DARKBLUE);
+	DrawText(cstr, (int)m_shape.x + 5, (int)m_shape.y + 1, 40, DARKBLUE);
 
 	// If the mouse is hovering over the button, change the colour of the border
 	if (m_mousePosition.x >= m_shape.x && m_mousePosition.x <= m_endPositionX &&
 		m_mousePosition.y >= m_shape.y && m_mousePosition.y <= m_endPositionY)
 	{
-		DrawRectangleLines(m_shape.x, m_shape.y, m_shape.width, m_shape.height, BLUE);
+		DrawRectangleLines((int)m_shape.x, (int)m_shape.y, (int)m_shape.width, (int)m_shape.height, BLUE);
 	}
 }

@@ -73,7 +73,7 @@ void DefeatState::Draw()
 	// Draw Super Shadow
 	DrawTexture(m_superShadow, 0, 0, WHITE);
 
-	DrawText("BETTER LUCK NEXT TIME", GetScreenWidth() * 0.3f, 0, 30, RED);
+	DrawText("BETTER LUCK NEXT TIME", (int)(GetScreenWidth() * 0.3f), 0, 30, RED);
 
 	// Draw exit button
 	m_exitButton->Draw();

@@ -73,7 +73,7 @@ void SplashState::Draw()
 	if (m_timer < 3.0f)
 	{
 		// Draw The SEGA logo
-		DrawText("Characters owned by", GetScreenWidth() * 0.30, GetScreenHeight() * 0.25, 30, DARKBLUE);
+		DrawText("Characters owned by", (int)(GetScreenWidth() * 0.30f), (int)(GetScreenHeight() * 0.25f), 30, DARKBLUE);
 		DrawTexture(m_logo, 0, GetScreenHeight() / 2 - m_logo.height / 2, WHITE);
 	}
 
@@ -81,7 +81,7 @@ void SplashState::Draw()
 	if (m_timer > 3.0f)
 	{
 		// Tell the player who created the game
-		DrawText("Game made by", GetScreenWidth() * 0.37, GetScreenHeight() * 0.25, 30, DARKBLUE);
-		DrawText("LOGAN RYAN", GetScreenWidth() * 0.10, GetScreenHeight() * 0.4, 100, DARKBLUE);
+		DrawText("Game made by", (int)(GetScreenWidth() * 0.37f), (int)(GetScreenHeight() * 0.25f), 30, DARKBLUE);
+		DrawText("LOGAN RYAN", (int)(GetScreenWidth() * 0.10f), (int)(GetScreenHeight() * 0.4f), 100, DARKBLUE);
 	}
 }
