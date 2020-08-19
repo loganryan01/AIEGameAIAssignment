@@ -26,6 +26,13 @@ void SplashState::Unload()
 void SplashState::Update(float deltaTime)
 {
 	m_timer += deltaTime;
+
+	if (m_timer > 6.0f)
+	{
+		m_app->GetGameStateManager()->SetState("Splash", nullptr); // unload
+		m_app->GetGameStateManager()->PopState();
+		m_app->GetGameStateManager()->PushState("Menu");
+	}
 }
 
 void SplashState::Draw()

@@ -11,6 +11,8 @@ public:
 	// Destructor
 	~Application();
 
+	void Load();
+
 	// Run the game
 	void Run();
 

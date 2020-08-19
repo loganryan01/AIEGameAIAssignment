@@ -85,7 +85,7 @@ public:
 
 	void AddBarricade(float xPos, float yPos)
 	{
-		m_barricades.push_back({ xPos, yPos, 16, 16 });
+		m_barricades.push_back({ xPos, yPos});
 	}
 
 	// Get nodes
@@ -94,7 +94,7 @@ public:
 		return m_nodes;
 	}
 
-	const std::vector<Rectangle>& GetBarricades()
+	const std::vector<Vector2>& GetBarricades()
 	{
 		return m_barricades;
 	}
@@ -324,5 +324,5 @@ public:
 protected:
 
 	std::vector<Node*> m_nodes;
-	std::vector<Rectangle> m_barricades;
+	std::vector<Vector2> m_barricades;
 };

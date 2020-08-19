@@ -22,25 +22,33 @@ Application::~Application()
 
 }
 
-void Application::Run()
+void Application::Load()
 {
 	InitWindow(m_windowWidth, m_windowHeight, "Sonic Chaos");
 
 	m_gameStateManager = new GameStateManager();
-	
-	//m_gameStateManager->SetState("Splash", new SplashState(this));
+
+	m_gameStateManager->SetState("Splash", new SplashState(this));
 	m_gameStateManager->SetState("Menu", new MenuState(this));
-	//m_gameStateManager->SetState("Play", new PlayState(this));
-	
-	//m_gameStateManager->PushState("Splash");
-	m_gameStateManager->PushState("Menu");
-	//m_gameStateManager->PushState("Play");
+	m_gameStateManager->SetState("Play", new PlayState(this));
+
+	m_gameStateManager->PushState("Splash");
+}
+
+void Application::Run()
+{
+	Load();
 
 	while (!WindowShouldClose())
 	{
 		float dt = GetFrameTime();
 		Update(dt);
 		Draw();
+
+		if (m_gameStateManager->GetStack().empty())
+		{
+			break;
+		}
 	}
 
 	delete m_gameStateManager;

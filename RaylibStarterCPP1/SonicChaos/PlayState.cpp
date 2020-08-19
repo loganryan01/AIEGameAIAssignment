@@ -176,42 +176,42 @@ void PlayState::Update(float deltaTime)
 	//----- Collision -----
 	for (auto barricade : m_graph->GetBarricades())
 	{
-		if (CheckCollisionRecs(m_player->GetTopAABB(), barricade) && m_player->GetVelocity().y < 0)
+		if (CheckCollisionCircleRec(barricade, 8.0f, m_player->GetTopAABB()) && m_player->GetVelocity().y < 0)
 		{
 			m_player->SetVelocity({ m_player->GetVelocity().x, 0 });
 		}
 
-		if (CheckCollisionRecs(m_player->GetBottomAABB(), barricade) && m_player->GetVelocity().y > 0)
+		if (CheckCollisionCircleRec(barricade, 8.0f, m_player->GetBottomAABB()) && m_player->GetVelocity().y > 0)
 		{
 			m_player->SetVelocity({ m_player->GetVelocity().x, 0 });
 		}
 
-		if (CheckCollisionRecs(m_player->GetLeftAABB(), barricade) && m_player->GetVelocity().x < 0)
+		if (CheckCollisionCircleRec(barricade, 8.0f, m_player->GetLeftAABB()) && m_player->GetVelocity().x < 0)
 		{
 			m_player->SetVelocity({ 0, m_player->GetVelocity().y });
 		}
 
-		if (CheckCollisionRecs(m_player->GetRightAABB(), barricade) && m_player->GetVelocity().x > 0)
+		if (CheckCollisionCircleRec(barricade, 8.0f, m_player->GetRightAABB()) && m_player->GetVelocity().x > 0)
 		{
 			m_player->SetVelocity({ 0, m_player->GetVelocity().y });
 		}
 
-		if (CheckCollisionRecs(m_enemy->GetTopAABB(), barricade) && m_enemy->GetVelocity().y < 0)
+		if (CheckCollisionCircleRec(barricade, 8.0f, m_enemy->GetTopAABB()) && m_enemy->GetVelocity().y < 0)
 		{
 			m_enemy->SetVelocity({ m_enemy->GetVelocity().x, 0 });
 		}
 
-		if (CheckCollisionRecs(m_enemy->GetBottomAABB(), barricade) && m_enemy->GetVelocity().y > 0)
+		if (CheckCollisionCircleRec(barricade, 8.0f, m_enemy->GetBottomAABB()) && m_enemy->GetVelocity().y > 0)
 		{
 			m_enemy->SetVelocity({ m_enemy->GetVelocity().x, 0 });
 		}
 
-		if (CheckCollisionRecs(m_enemy->GetLeftAABB(), barricade) && m_enemy->GetVelocity().x < 0)
+		if (CheckCollisionCircleRec(barricade, 8.0f, m_enemy->GetLeftAABB()) && m_enemy->GetVelocity().x < 0)
 		{
 			m_enemy->SetVelocity({ 0, m_enemy->GetVelocity().y });
 		}
 
-		if (CheckCollisionRecs(m_enemy->GetRightAABB(), barricade) && m_enemy->GetVelocity().x > 0)
+		if (CheckCollisionCircleRec(barricade, 8.0f, m_enemy->GetRightAABB()) && m_enemy->GetVelocity().x > 0)
 		{
 			m_enemy->SetVelocity({ 0, m_enemy->GetVelocity().y });
 		}

@@ -16,6 +16,8 @@ public:
 	void Update(float deltaTime);
 	void Draw();
 
+	std::list<IGameState*> GetStack() { return m_stack; }
+
 	void SetState(const char* name, IGameState* state);
 	void PushState(const char* name);
 	void PopState();
