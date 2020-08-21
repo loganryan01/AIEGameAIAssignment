@@ -15,6 +15,7 @@ This project has been created to demonstrate a basic understanding of Game AI.
 `$(ProjectDir)\bin\$(Platform)\$(Configuration)\`
 
 ## Screenshots
+![Demo](/Resources/screenshots/ScreenCapture.gif "Demo")
 
 ## Credits
  - **Raylib:** A C++ Game Programming framework, used for this demo. <br> [https://www.raylib.com](https://www.raylib.com)
